@@ -4723,7 +4723,7 @@
 	)
 	(text "Finds DSR DTR Circuits & \nImplement RST once VIO & VDD are set"
 		(exclude_from_sim no)
-		(at 146.812 86.868 0)
+		(at 140.97 66.802 0)
 		(effects
 			(font
 				(size 1.27 1.27)
