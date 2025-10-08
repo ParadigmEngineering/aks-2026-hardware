@@ -4830,6 +4830,16 @@
 		)
 		(uuid "3a45be7e-0792-477c-a709-dacee9e5717b")
 	)
+	(text "Hello World"
+		(exclude_from_sim no)
+		(at 185.166 143.51 0)
+		(effects
+			(font
+				(size 12.7 12.7)
+			)
+		)
+		(uuid "523d7b57-0617-4fda-93e4-b0c6e8d3fba8")
+	)
 	(text "Same setup used on NUCLEO G4 Board"
 		(exclude_from_sim no)
 		(at 121.666 22.86 0)
