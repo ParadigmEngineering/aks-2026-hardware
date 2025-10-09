@@ -1,4 +1,4 @@
-24772192981602264
+24740878723750500
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -58435,139 +58435,6 @@ heatsink
 0
 0
 0
-Imported Models
-1k Panasonic SMT
-
-ERJ-2RKF1001X 
-0
-2
-2
-Imported Models
-61301011121
-
-
-0
-10
-10
-Imported Models
-AMPHENOL_10118192-0002LF
-
-
-0
-11
-11
-Imported Models
-CAPC2012X135N
-
-
-0
-2
-2
-Imported Models
-CAP_UES_8X11P5_NCH
-
-UKL2A100KPD 
-0
-2
-2
-Imported Models
-CONN_PH1-02-UA_ADM
-
-PH1-02-UA 
-0
-2
-2
-Imported Models
-FUSE_3568
-
-
-0
-4
-4
-Imported Models
-MOLEX-2Pin_4mm
-
-
-0
-2
-2
-Imported Models
-MOLEX_428202223
-
-
-0
-4
-4
-Imported Models
-RES_ERJ2RKF1000X
-
-
-0
-2
-2
-Imported Models
-SILABS_CP2102N-A02-GQFN20R
-
-
-0
-21
-21
-Imported Models
-SMASeries_LTF
-
-SMAJ5.0CA 
-0
-2
-2
-Imported Models
-SOT223-3_ONS
-
-NCV1117ST12T3 
-0
-3
-3
-Imported Models
-SW_500SSP1S2M2QEA
-
-
-0
-3
-3
-Imported Models
-SW_7914J-1-000E_BRN
-
-7914J-1-000E 
-0
-4
-4
-Imported Models
-SW_1437566-4
-
-
-0
-2
-2
-Imported Models
-TI-LM1084-ADJ
-
-LM1084IT-ADJ/NOPB 
-0
-3
-3
-Imported Models
-TO254P1054X470X1955-3
-
-
-0
-3
-3
-Imported Models
-VREG_UA78M33CDCYR
-
-
-0
-4
-4
 Inductor_SMD
 L_6.3x6.3_H3
 Choke, SMD, 6.3x6.3mm 3mm height
@@ -91332,6 +91199,13 @@ STM32 POC Imports F
 CR_60JFILM_STM
 
 BAT60JFILM 
+0
+2
+2
+STM32 POC Imports F
+DIODE_ESDALC6V1-1U2
+
+
 0
 2
 2
