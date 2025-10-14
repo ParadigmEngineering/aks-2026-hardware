@@ -7326,6 +7326,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 146.05) (xy 224.79 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8907f4b7-bac5-49e4-948b-f89eb15d5d13")
+	)
+	(wire
+		(pts
 			(xy 111.76 149.86) (xy 125.73 149.86)
 		)
 		(stroke
@@ -7686,7 +7696,7 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 146.05) (xy 199.39 146.05)
+			(xy 195.58 146.05) (xy 204.47 146.05)
 		)
 		(stroke
 			(width 0)
@@ -8255,7 +8265,7 @@
 		(uuid "19ad81d3-4559-4c43-9300-23f5913aded4")
 	)
 	(label "BOOT0"
-		(at 199.39 146.05 0)
+		(at 224.79 146.05 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -9852,6 +9862,74 @@
 			(project ""
 				(path "/606f173c-31bb-46ac-af1a-601e912df5b1"
 					(reference "#PWR07")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 209.55 146.05 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "51384c53-1a22-4cbc-99f2-eb0c3b127bd9")
+		(property "Reference" "SW4"
+			(at 209.55 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW_Push"
+			(at 209.55 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "aux_board:PTS636SP50SMTRLFS"
+			(at 209.55 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 209.55 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Push button switch, generic, two pins"
+			(at 209.55 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "66968eb0-ff0b-4236-a91f-83082e596ea0")
+		)
+		(pin "2"
+			(uuid "6be35c27-e381-441c-8f2d-14583e6a6d06")
+		)
+		(instances
+			(project "STM32 POC Board"
+				(path "/606f173c-31bb-46ac-af1a-601e912df5b1"
+					(reference "SW4")
 					(unit 1)
 				)
 			)
