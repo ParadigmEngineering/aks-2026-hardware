@@ -7,6 +7,13 @@ extern "C" {
 
 #include "stm32g474xx.h"
 
-//FUNCTION PROTOTYPES
-void initCANClocks();
-void configCANPinMode();
+// FUNCATION PROTOTYPES
+void initFDCANClocks();
+void configFDCANPinMode();
+void setFDCANAF();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
