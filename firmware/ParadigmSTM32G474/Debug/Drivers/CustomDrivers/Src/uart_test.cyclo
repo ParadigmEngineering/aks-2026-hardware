@@ -1,8 +1,8 @@
 ../Drivers/CustomDrivers/Src/uart_test.c:3:6:initClocks	1
 ../Drivers/CustomDrivers/Src/uart_test.c:10:6:configPinMode	1
-../Drivers/CustomDrivers/Src/uart_test.c:19:6:setAF	1
-../Drivers/CustomDrivers/Src/uart_test.c:35:6:configureUart1Pins	1
-../Drivers/CustomDrivers/Src/uart_test.c:44:6:configureUart1	1
-../Drivers/CustomDrivers/Src/uart_test.c:89:9:receiveUart	2
-../Drivers/CustomDrivers/Src/uart_test.c:104:6:transmitUart	2
-../Drivers/CustomDrivers/Src/uart_test.c:115:6:initUART	1
+../Drivers/CustomDrivers/Src/uart_test.c:18:6:setAF	1
+../Drivers/CustomDrivers/Src/uart_test.c:28:6:configureUart1Pins	1
+../Drivers/CustomDrivers/Src/uart_test.c:37:6:configureUart1	1
+../Drivers/CustomDrivers/Src/uart_test.c:82:9:receiveUart	2
+../Drivers/CustomDrivers/Src/uart_test.c:97:6:transmitUart	2
+../Drivers/CustomDrivers/Src/uart_test.c:108:6:initUART	1

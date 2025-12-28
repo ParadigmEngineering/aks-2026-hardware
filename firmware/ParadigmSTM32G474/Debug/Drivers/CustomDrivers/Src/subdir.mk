@@ -5,12 +5,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Drivers/CustomDrivers/Src/fdcan_test.c \
 ../Drivers/CustomDrivers/Src/uart_test.c 
 
 OBJS += \
+./Drivers/CustomDrivers/Src/fdcan_test.o \
 ./Drivers/CustomDrivers/Src/uart_test.o 
 
 C_DEPS += \
+./Drivers/CustomDrivers/Src/fdcan_test.d \
 ./Drivers/CustomDrivers/Src/uart_test.d 
 
 
@@ -21,7 +24,7 @@ Drivers/CustomDrivers/Src/%.o Drivers/CustomDrivers/Src/%.su Drivers/CustomDrive
 clean: clean-Drivers-2f-CustomDrivers-2f-Src
 
 clean-Drivers-2f-CustomDrivers-2f-Src:
-	-$(RM) ./Drivers/CustomDrivers/Src/uart_test.cyclo ./Drivers/CustomDrivers/Src/uart_test.d ./Drivers/CustomDrivers/Src/uart_test.o ./Drivers/CustomDrivers/Src/uart_test.su
+	-$(RM) ./Drivers/CustomDrivers/Src/fdcan_test.cyclo ./Drivers/CustomDrivers/Src/fdcan_test.d ./Drivers/CustomDrivers/Src/fdcan_test.o ./Drivers/CustomDrivers/Src/fdcan_test.su ./Drivers/CustomDrivers/Src/uart_test.cyclo ./Drivers/CustomDrivers/Src/uart_test.d ./Drivers/CustomDrivers/Src/uart_test.o ./Drivers/CustomDrivers/Src/uart_test.su
 
 .PHONY: clean-Drivers-2f-CustomDrivers-2f-Src
 
