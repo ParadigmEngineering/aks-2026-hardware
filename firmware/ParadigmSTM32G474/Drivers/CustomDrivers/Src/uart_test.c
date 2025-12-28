@@ -11,17 +11,17 @@ void configPinMode()
 {
 	// RESET PIN MODES
 	GPIOC->MODER &= ~((3u << 8) | (3u << 10)); // Clear PC4 and PC5
-	GPIOC->MODER &= ((2u << 8) | (2u << 10)); //Set PC4 and PC5 to Alternate Function (AF)
+	GPIOC->MODER |= ((2u << 8) | (2u << 10)); //Set PC4 and PC5 to Alternate Function (AF)
 
 }
 
 void setAF()
 {
 	// RESET ALTERNATE FUNCTION. AFR[0] IS THE ALTERNATE FUNCTION LOW REGISTER
-	GPIOC->AFR[0] &= ~((15u << 16) | (15u << 20)); // Clear PC4 AF and PC5 AF
+	GPIOC->AFR[0] &= ~((0xF << 16) | (0xF << 20));
 
 	// SET ALTERNATE FUNCTION
-	GPIOC->AFR[0] &= ((7u << 16) | (7u << 20)); // Set PC4 AF and PC5 AF
+	GPIOC->AFR[0] |= ((7u << 16) | (7u << 20));
 
 }
 
