@@ -61,8 +61,8 @@ all: main-build
 main-build: ParadigmSTM32G474.elf secondary-outputs
 
 # Tool invocations
-ParadigmSTM32G474.elf ParadigmSTM32G474.map: $(OBJS) $(USER_OBJS) C:\Users\Steven\ Dyer\STM32CubeIDE\workspace_1.19.0\ParadigmSTM32G474\STM32G474RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ParadigmSTM32G474.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Steven Dyer\STM32CubeIDE\workspace_1.19.0\ParadigmSTM32G474\STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ParadigmSTM32G474.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ParadigmSTM32G474.elf ParadigmSTM32G474.map: $(OBJS) $(USER_OBJS) /home/steven/workspace/aks-2026-hardware/firmware/ParadigmSTM32G474/STM32G474RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ParadigmSTM32G474.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/steven/workspace/aks-2026-hardware/firmware/ParadigmSTM32G474/STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ParadigmSTM32G474.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

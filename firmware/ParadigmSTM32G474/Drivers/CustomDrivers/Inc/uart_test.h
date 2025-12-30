@@ -13,6 +13,7 @@ void configPinMode();
 void setAF();
 void configureUart1Pins();
 void configureUart1();
+void USART1_IRQHandler()
 uint8_t receiveUart();
 void transmitUart(uint8_t data);
 void initUART();

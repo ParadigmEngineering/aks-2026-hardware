@@ -1,11 +1,41 @@
 #include "uart_test.h"
 
+
+#define UART_RX_BUF_SIZE 128
+#define BAUDRATE         115200
+#define PERIPHERAL_CLOCK 8000000
+
+
+typedef struct {
+	uint8_t buf[UART_RX_BUF_SIZE];
+	volatile uint16_t head;
+	volatile uint16_t tail;
+} uart_ring_buffer_t;
+
+
+static uart_ring_buffer_t uart1_rx;
+
+
+static void uart_rx_push(uint8_t data)
+{
+	uint16_t next = (uart1_rx.head + 1) % UART_RX_BUF_SIZE;
+
+	if (next != uart1_rx.tail)
+	{
+		uart1_rx.buf[uart1_rx.head] = data;
+		uart1_rx.head = next;
+	}
+	// else: BUFFER FULL -> BYTE DROPPED
+}
+
+
 void initClocks()
 {
 	// INITIALIZE ALL CLOCKS
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN; // Enable GPIO Port C Clock (Bit 2)
 	RCC->APB2ENR |= RCC_APB2ENR_USART1EN; // Enable UART 1 Clock (Bit 14)
 }
+
 
 void configPinMode()
 {
@@ -14,6 +44,7 @@ void configPinMode()
 	GPIOC->MODER |= ((2u << 8) | (2u << 10)); //Set PC4 and PC5 to Alternate Function (AF)
 
 }
+
 
 void setAF()
 {
@@ -25,6 +56,7 @@ void setAF()
 
 }
 
+
 void configureUart1Pins()
 {
 	// SET PIN MODE TO ALTERNATE FUNCTION
@@ -34,17 +66,16 @@ void configureUart1Pins()
 	setAF();
 }
 
+
 void configureUart1()
 {
 	// CLEAR BITS
 	USART1->CR1 &= ~(USART_CR1_M1 // Clear M1 for 1 start bit and 8 data bits (28)
-					| (0x03 << 26) // Inhibit interrupts at bits 26 and 27 (27/26)
 					| USART_CR1_OVER8 // Oversampling by 16 (15)
 					| USART_CR1_CMIE // Inhibit character match interrupt (14)
 					| USART_CR1_MME // Do not enable mute mode (13)
 					| USART_CR1_M0 // Clear M0 for 1 start bit and 8 data bits (12)
 					| USART_CR1_PS // Enable even parity (9)
-					| (0x1F << 3) // Inhibit interrupts at bits 4 to 8 (4-8)
 					| USART_CR1_TE // Do not enable transmitter yet (3)
 					| USART_CR1_RE // Do not enable receiver yet (2)
 					| USART_CR1_UE); // Do not enable UART1 yet (0)
@@ -70,14 +101,38 @@ void configureUart1()
 	// SET BITS
 	USART1->CR3 |= (USART_CR3_OVRDIS); // Disable overrun functionality (12)
 
+	// ENABLE RX INTERRUPT
+	USART1->CR1 |= USART_CR1_RXNEIE;
+
 	// SET BAUD RATE IN BRR REGISTER
-	USART1->BRR = 35; // Value that sets baud rate to 115200 at input frequency of 4MHz
+	USART1->BRR = BAUDRATE;
 
 	//ENABLE UART
 	USART1->CR1 |= (USART_CR1_TE // Enable transmitter (3)
 					| USART_CR1_RE // Enable receiver (2)
 					| USART_CR1_UE); // Enable UART1 (0)
+
+	// ENABLE NVIC INTERRUPT
+	NVIC_EnableIRQ(USART1_IRQn);
 }
+
+
+void USART1_IRQHandler()
+{
+	if (USART1->ISR & USART_ISR_RXNE)
+	{
+		uint8_t data = USART1->RDR;
+		uart_rx_push(data);
+	}
+
+	// CLEAR ERROR FLAGS IF ANY
+	if (USART1->ISR & (USART_ISR_ORE | USART_ISR_FE | USART_ISR_NE | USART_ISR_PE))
+	{
+		volatile uint32_t tmp = USART1->RDR;
+		(void)tmp;
+	}
+}
+
 
 uint8_t receiveUart()
 {
@@ -85,14 +140,16 @@ uint8_t receiveUart()
 
 	// IF THERE IS DATA IN THE RECEIVE DATA REGISTER
 	// USART_ISR_RXNE EXPANDS TO (1 << 5)
-	if (USART1->ISR & USART_ISR_RXNE)
+	if (uart1_rx.head != uart1_rx.tail)
 	{
 		// READ DATA FROM REGISTER
-		rxData = USART1->RDR;
+		rxData = uart1_rx.buf[uart1_rx.tail];
+		uart1_rx.tail = (uart1_rx.tail + 1) % UART_RX_BUF_SIZE;
 	}
 
 	return rxData;
 }
+
 
 void transmitUart(uint8_t data)
 {
