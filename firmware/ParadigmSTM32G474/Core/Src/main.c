@@ -97,7 +97,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
 	  uint8_t tx = 0x55;
 	  uint8_t rx = 0;
 
@@ -112,8 +111,10 @@ int main(void)
 		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		  HAL_Delay(2000);
 	  }
-    /* USER CODE BEGIN 3 */
   }
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 
