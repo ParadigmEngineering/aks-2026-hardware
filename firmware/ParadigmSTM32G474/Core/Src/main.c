@@ -40,9 +40,21 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+FDCAN_HandleTypeDef hfdcan2;
+
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
+FDCAN_TxHeaderTypeDef TxHeader;
+FDCAN_RxHeaderTypeDef RxHeader;
+
+uint32_t TxMailbox;
+
+uint8_t TxData[8];
+uint8_t RxData[8];
+
+uint32_t msg_count = 0;
 
 /* USER CODE END PV */
 
@@ -50,12 +62,22 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_FDCAN2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_CAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hcan)
+{
+    DEBUG("HAL_CAN_RxFifo0MsgPendingCallback");
+    if (HAL_FDCAN_GetRxMessage(hcan, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+        DEBUG("Got message %lu - id = 0x%04lx len = 0x%lx, data=%02x%02x%02x%02x%02x%02x%02x%02x", msg_count + 1, RxHeader.StdId, RxHeader.DLC, RxData[0], RxData[1], RxData[2], RxData[3], RxData[4], RxData[5], RxData[6], RxData[7]);
+    }
+    msg_count++;
+}
 
 /* USER CODE END 0 */
 
@@ -89,8 +111,48 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_FDCAN2_Init();
   /* USER CODE BEGIN 2 */
   initUART();
+
+  DBG("\n\n\n\n\n---------------------\nCAN Loopback Starting");
+
+      CAN_FilterTypeDef canfilterconfig;
+
+      canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+      canfilterconfig.FilterBank = 12;  // anything between 0 to SlaveStartFilterBank
+      canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+      //canfilterconfig.FilterIdHigh = 0x103<<5;
+      canfilterconfig.FilterIdHigh = 0x0000;
+      canfilterconfig.FilterIdLow = 0x0000;
+      //canfilterconfig.FilterMaskIdHigh = 0x1<<13;
+      canfilterconfig.FilterMaskIdHigh = 0x0;
+      canfilterconfig.FilterMaskIdLow = 0x0;
+      canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+      canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+      canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
+
+      HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
+
+      HAL_CAN_Start(&hcan1);
+
+      HAL_CAN_ActivateNotification(
+              &hcan1,
+              CAN_IT_TX_MAILBOX_EMPTY |
+              CAN_IT_RX_FIFO0_MSG_PENDING |
+              CAN_IT_RX_FIFO0_FULL |
+              CAN_IT_RX_FIFO0_OVERRUN |
+              CAN_IT_RX_FIFO1_MSG_PENDING |
+              CAN_IT_RX_FIFO1_FULL |
+              CAN_IT_RX_FIFO1_OVERRUN |
+              CAN_IT_WAKEUP |
+              CAN_IT_SLEEP_ACK |
+              CAN_IT_ERROR_WARNING |
+              CAN_IT_ERROR_PASSIVE |
+              CAN_IT_BUSOFF |
+              CAN_IT_LAST_ERROR_CODE |
+              CAN_IT_ERROR
+          );
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,6 +173,7 @@ int main(void)
 		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		  HAL_Delay(2000);
 	  }
+
   }
     /* USER CODE END WHILE */
 
@@ -156,6 +219,49 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief FDCAN2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_FDCAN2_Init(void)
+{
+
+  /* USER CODE BEGIN FDCAN2_Init 0 */
+
+  /* USER CODE END FDCAN2_Init 0 */
+
+  /* USER CODE BEGIN FDCAN2_Init 1 */
+
+  /* USER CODE END FDCAN2_Init 1 */
+  hfdcan2.Instance = FDCAN2;
+  hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
+  hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
+  hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
+  hfdcan2.Init.AutoRetransmission = DISABLE;
+  hfdcan2.Init.TransmitPause = DISABLE;
+  hfdcan2.Init.ProtocolException = DISABLE;
+  hfdcan2.Init.NominalPrescaler = 16;
+  hfdcan2.Init.NominalSyncJumpWidth = 1;
+  hfdcan2.Init.NominalTimeSeg1 = 1;
+  hfdcan2.Init.NominalTimeSeg2 = 1;
+  hfdcan2.Init.DataPrescaler = 1;
+  hfdcan2.Init.DataSyncJumpWidth = 1;
+  hfdcan2.Init.DataTimeSeg1 = 1;
+  hfdcan2.Init.DataTimeSeg2 = 1;
+  hfdcan2.Init.StdFiltersNbr = 0;
+  hfdcan2.Init.ExtFiltersNbr = 0;
+  hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
+  if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN FDCAN2_Init 2 */
+
+  /* USER CODE END FDCAN2_Init 2 */
+
 }
 
 /**
@@ -222,6 +328,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
