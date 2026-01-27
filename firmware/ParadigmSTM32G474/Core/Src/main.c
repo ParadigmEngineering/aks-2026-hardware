@@ -70,14 +70,7 @@ static void MX_FDCAN2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_CAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hcan)
-{
-    DEBUG("HAL_CAN_RxFifo0MsgPendingCallback");
-    if (HAL_FDCAN_GetRxMessage(hcan, FDCAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
-        DEBUG("Got message %lu - id = 0x%04lx len = 0x%lx, data=%02x%02x%02x%02x%02x%02x%02x%02x", msg_count + 1, RxHeader.StdId, RxHeader.DLC, RxData[0], RxData[1], RxData[2], RxData[3], RxData[4], RxData[5], RxData[6], RxData[7]);
-    }
-    msg_count++;
-}
+
 
 /* USER CODE END 0 */
 
@@ -115,44 +108,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   initUART();
 
-  DBG("\n\n\n\n\n---------------------\nCAN Loopback Starting");
-
-      CAN_FilterTypeDef canfilterconfig;
-
-      canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-      canfilterconfig.FilterBank = 12;  // anything between 0 to SlaveStartFilterBank
-      canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-      //canfilterconfig.FilterIdHigh = 0x103<<5;
-      canfilterconfig.FilterIdHigh = 0x0000;
-      canfilterconfig.FilterIdLow = 0x0000;
-      //canfilterconfig.FilterMaskIdHigh = 0x1<<13;
-      canfilterconfig.FilterMaskIdHigh = 0x0;
-      canfilterconfig.FilterMaskIdLow = 0x0;
-      canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
-      canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-      canfilterconfig.SlaveStartFilterBank = 13;  // 13 to 27 are assigned to slave CAN (CAN 2) OR 0 to 12 are assgned to CAN1
-
-      HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
-
-      HAL_CAN_Start(&hcan1);
-
-      HAL_CAN_ActivateNotification(
-              &hcan1,
-              CAN_IT_TX_MAILBOX_EMPTY |
-              CAN_IT_RX_FIFO0_MSG_PENDING |
-              CAN_IT_RX_FIFO0_FULL |
-              CAN_IT_RX_FIFO0_OVERRUN |
-              CAN_IT_RX_FIFO1_MSG_PENDING |
-              CAN_IT_RX_FIFO1_FULL |
-              CAN_IT_RX_FIFO1_OVERRUN |
-              CAN_IT_WAKEUP |
-              CAN_IT_SLEEP_ACK |
-              CAN_IT_ERROR_WARNING |
-              CAN_IT_ERROR_PASSIVE |
-              CAN_IT_BUSOFF |
-              CAN_IT_LAST_ERROR_CODE |
-              CAN_IT_ERROR
-          );
+  HAL_FDCAN_Start(&hfdcan2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -240,19 +196,19 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
   hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan2.Init.AutoRetransmission = DISABLE;
+  hfdcan2.Init.AutoRetransmission = ENABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
-  hfdcan2.Init.NominalPrescaler = 16;
+  hfdcan2.Init.NominalPrescaler = 4;
   hfdcan2.Init.NominalSyncJumpWidth = 1;
-  hfdcan2.Init.NominalTimeSeg1 = 1;
-  hfdcan2.Init.NominalTimeSeg2 = 1;
+  hfdcan2.Init.NominalTimeSeg1 = 13;
+  hfdcan2.Init.NominalTimeSeg2 = 2;
   hfdcan2.Init.DataPrescaler = 1;
   hfdcan2.Init.DataSyncJumpWidth = 1;
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 0;
+  hfdcan2.Init.ExtFiltersNbr = 1;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
