@@ -46,5 +46,24 @@ typedef union {
 	uint8_t all;
 } MCU_ErrorFlags_t;
 
+typedef struct {
+	float bus_voltage;
+	float bus_current;
+	float phase_current;
+	int16_t speed;
+	int8_t ctrl_temp;
+	int8_t motor_temp;
+	bool is_running;
+	bool is_torque_mode;
+	MCU_ErrorFlags_t errors;
+	uint8_t life_signal;
+} MCU_Status_t;
+
+typedef struct {
+	int16_t target_current;
+	int16_t target_speed;
+	ControlCommand_t command;
+	uint8_t life_counter;
+} VCU_Command_t;
 
 #endif
