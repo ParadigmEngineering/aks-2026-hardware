@@ -1,0 +1,2 @@
+../Core/Src/drive_can.c:15:6:Drive_Init	16	static
+../Core/Src/drive_can.c:35:13:ConfigureFDCANFilter	32	static

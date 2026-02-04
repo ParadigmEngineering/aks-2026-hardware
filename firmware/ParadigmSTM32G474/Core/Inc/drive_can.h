@@ -8,29 +8,26 @@
 #ifndef INC_DRIVE_CAN_H_
 #define INC_DRIVE_CAN_H_
 
+#ifdef _cplusplus
+extern "C" {
+#endif
+
 #include "stm32g4xx_hal.h"
+#include <stdbool.h>
+
+#define VCU_ADDRESS 		0xD0
+#define MCU_ADDRESS_DEFAULT 0xEF
+
+#define CAN_ID_VCU_TO_MCU 	0x0C01EFD0
+#define CAN_ID_MCU_STATUS1 	0x1801D0EF
+#define CAN_ID_MCU_STATUS2 	0x1802D0EF
 
 typedef enum {
-	ADDR_VCU 		= 0xD0;
-	ADDR_MCU_Base 	= 0xEF;
-	ADDR_BMS_BASE 	= 0xF3;
-	ADDR_GLOBAL 	= 0xFF;
-} CAN_Address_t;
-
-typedef enum {
-	ID_VCU_HANDSHAKE 	= 0x0C01EFD0;
-	ID_VCU_CONTROL 		= 0x0C01EFD0;
-
-	ID_MCU_STATUS_1 	= 0x1801D0EF;
-	ID_MCU_STATUS_2 	= 0x1802D0EF;
-} CAN_MessageID_t;
-
-typedef enum {
-	CMD_HALTED 				= 0x00;
-	CMD_RUNNING 			= 0x01;
-	CMD_TORQUE_MODE 		= 0x02;
-	CMD_SPEED_MODE_BASE 	= 0x04;
-} ControlCommand_t;
+	CMD_HALTED 				= 0x00,
+	CMD_RUNNING 			= 0x01,
+	CMD_TORQUE_MODE 		= 0x02,
+	CMD_SPEED_MODE_BASE 	= 0x04,
+} DriveCommand_t;
 
 typedef union {
 	struct {
@@ -42,28 +39,47 @@ typedef union {
 		uint8_t motor_overheat 		: 1;
 		uint8_t motor_stalled 		: 1;
 		uint8_t motor_out_of_phase 	: 1;
-	}; bits;
+	} bits;
 	uint8_t all;
-} MCU_ErrorFlags_t;
+} DriveErrorFlags_t;
 
 typedef struct {
 	float bus_voltage;
 	float bus_current;
 	float phase_current;
 	int16_t speed;
+
 	int8_t ctrl_temp;
 	int8_t motor_temp;
 	bool is_running;
 	bool is_torque_mode;
-	MCU_ErrorFlags_t errors;
+
+	DriveErrorFlags_t errors;
 	uint8_t life_signal;
-} MCU_Status_t;
+} DriveStatus_t;
 
 typedef struct {
 	int16_t target_current;
 	int16_t target_speed;
-	ControlCommand_t command;
+	DriveCommand_t command;
 	uint8_t life_counter;
 } VCU_Command_t;
+
+typedef struct {
+	FDCAN_HandleTypeDef *hfdcan;
+	DriveStatus_t status;
+
+	uint8_t mcu_address;
+	uint32_t can_id_command;
+} DriveController_t;
+
+bool Drive_Init(FDCAN_HandleTypeDef *hfdcan, uint8_t mcu_address);
+bool Drive_SendHandshake();
+bool Drive_SendCommand(int16_t target_current, int16_t target_speed, DriveCommand_t command);
+bool Drive_Stop();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

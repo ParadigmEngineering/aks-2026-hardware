@@ -60,18 +60,134 @@ Discarded input sections
  .ARM.attributes
                 0x00000000       0x20 C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.100.202509120712/tools/bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/crt0.o
  .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
+ .group         0x00000000        0xc ./Core/Src/drive_can.o
  .text          0x00000000        0x0 ./Core/Src/drive_can.o
  .data          0x00000000        0x0 ./Core/Src/drive_can.o
  .bss           0x00000000        0x0 ./Core/Src/drive_can.o
- .debug_info    0x00000000       0x22 ./Core/Src/drive_can.o
- .debug_abbrev  0x00000000       0x12 ./Core/Src/drive_can.o
+ .bss.drive     0x00000000       0x20 ./Core/Src/drive_can.o
+ .text.Drive_Init
+                0x00000000       0x58 ./Core/Src/drive_can.o
+ .text.ConfigureFDCANFilter
+                0x00000000       0x5c ./Core/Src/drive_can.o
+ .debug_info    0x00000000      0x892 ./Core/Src/drive_can.o
+ .debug_abbrev  0x00000000      0x1d3 ./Core/Src/drive_can.o
  .debug_aranges
-                0x00000000       0x18 ./Core/Src/drive_can.o
- .debug_macro   0x00000000       0x11 ./Core/Src/drive_can.o
+                0x00000000       0x28 ./Core/Src/drive_can.o
+ .debug_rnglists
+                0x00000000       0x19 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x2aa ./Core/Src/drive_can.o
  .debug_macro   0x00000000      0xad8 ./Core/Src/drive_can.o
- .debug_line    0x00000000       0x38 ./Core/Src/drive_can.o
- .debug_str     0x00000000     0x2e92 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x15b ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x2e ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x28 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x8e ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x51 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x103 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x6a ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x1df ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x1c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0xfb ./Core/Src/drive_can.o
+ .debug_macro   0x00000000     0x1011 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x11f ./Core/Src/drive_can.o
+ .debug_macro   0x00000000    0x18b8c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x6d ./Core/Src/drive_can.o
+ .debug_macro   0x00000000     0x3558 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x190 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x5c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000     0x171f ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x600 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x1b6 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x34a ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x53c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x18b ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x43 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x23d ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x211 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x6bd ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x45c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x11c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x122 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x3d1 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x693 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0xa6 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x358 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x61 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x2a ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x43 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x34 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x370 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x16 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x4a ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x34 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x10 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x58 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x8e ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x1c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000      0x185 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x10 ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x3c ./Core/Src/drive_can.o
+ .debug_macro   0x00000000       0x20 ./Core/Src/drive_can.o
+ .debug_line    0x00000000      0x918 ./Core/Src/drive_can.o
+ .debug_str     0x00000000    0xe99a8 ./Core/Src/drive_can.o
  .comment       0x00000000       0x44 ./Core/Src/drive_can.o
+ .debug_frame   0x00000000       0x58 ./Core/Src/drive_can.o
  .ARM.attributes
                 0x00000000       0x34 ./Core/Src/drive_can.o
  .group         0x00000000        0xc ./Core/Src/main.o
@@ -123,6 +239,42 @@ Discarded input sections
  .bss.msg_count
                 0x00000000        0x4 ./Core/Src/main.o
  .debug_macro   0x00000000      0xad8 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x15b ./Core/Src/main.o
+ .debug_macro   0x00000000       0x2e ./Core/Src/main.o
+ .debug_macro   0x00000000       0x28 ./Core/Src/main.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/main.o
+ .debug_macro   0x00000000       0x8e ./Core/Src/main.o
+ .debug_macro   0x00000000       0x51 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x103 ./Core/Src/main.o
+ .debug_macro   0x00000000       0x6a ./Core/Src/main.o
+ .debug_macro   0x00000000      0x1df ./Core/Src/main.o
+ .debug_macro   0x00000000       0x1c ./Core/Src/main.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/main.o
+ .debug_macro   0x00000000       0xfb ./Core/Src/main.o
+ .debug_macro   0x00000000     0x1011 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x11f ./Core/Src/main.o
+ .debug_macro   0x00000000    0x18b8c ./Core/Src/main.o
+ .debug_macro   0x00000000       0x6d ./Core/Src/main.o
+ .debug_macro   0x00000000     0x3558 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x190 ./Core/Src/main.o
+ .debug_macro   0x00000000       0x5c ./Core/Src/main.o
+ .debug_macro   0x00000000     0x171f ./Core/Src/main.o
+ .debug_macro   0x00000000      0x600 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x1b6 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x34a ./Core/Src/main.o
+ .debug_macro   0x00000000      0x53c ./Core/Src/main.o
+ .debug_macro   0x00000000      0x18b ./Core/Src/main.o
+ .debug_macro   0x00000000       0x43 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x23d ./Core/Src/main.o
+ .debug_macro   0x00000000      0x211 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x6bd ./Core/Src/main.o
+ .debug_macro   0x00000000      0x45c ./Core/Src/main.o
+ .debug_macro   0x00000000      0x11c ./Core/Src/main.o
+ .debug_macro   0x00000000      0x122 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x3d1 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x693 ./Core/Src/main.o
+ .debug_macro   0x00000000       0xa6 ./Core/Src/main.o
+ .debug_macro   0x00000000      0x358 ./Core/Src/main.o
  .group         0x00000000        0xc ./Core/Src/stm32g4xx_hal_msp.o
  .group         0x00000000        0xc ./Core/Src/stm32g4xx_hal_msp.o
  .group         0x00000000        0xc ./Core/Src/stm32g4xx_hal_msp.o
@@ -3584,57 +3736,21 @@ LOAD C:/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_rnglists
                 0x000008b0       0x7f ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart_ex.o
 
-.debug_macro    0x00000000    0x23f0d
+.debug_macro    0x00000000     0x1a39
  .debug_macro   0x00000000      0x1dc ./Core/Src/main.o
- .debug_macro   0x000001dc      0x15b ./Core/Src/main.o
- .debug_macro   0x00000337       0x2e ./Core/Src/main.o
- .debug_macro   0x00000365       0x28 ./Core/Src/main.o
- .debug_macro   0x0000038d       0x22 ./Core/Src/main.o
- .debug_macro   0x000003af       0x8e ./Core/Src/main.o
- .debug_macro   0x0000043d       0x51 ./Core/Src/main.o
- .debug_macro   0x0000048e      0x103 ./Core/Src/main.o
- .debug_macro   0x00000591       0x6a ./Core/Src/main.o
- .debug_macro   0x000005fb      0x1df ./Core/Src/main.o
- .debug_macro   0x000007da       0x1c ./Core/Src/main.o
- .debug_macro   0x000007f6       0x22 ./Core/Src/main.o
- .debug_macro   0x00000818       0xfb ./Core/Src/main.o
- .debug_macro   0x00000913     0x1011 ./Core/Src/main.o
- .debug_macro   0x00001924      0x11f ./Core/Src/main.o
- .debug_macro   0x00001a43    0x18b8c ./Core/Src/main.o
- .debug_macro   0x0001a5cf       0x6d ./Core/Src/main.o
- .debug_macro   0x0001a63c     0x3558 ./Core/Src/main.o
- .debug_macro   0x0001db94      0x190 ./Core/Src/main.o
- .debug_macro   0x0001dd24       0x5c ./Core/Src/main.o
- .debug_macro   0x0001dd80     0x171f ./Core/Src/main.o
- .debug_macro   0x0001f49f      0x600 ./Core/Src/main.o
- .debug_macro   0x0001fa9f      0x1b6 ./Core/Src/main.o
- .debug_macro   0x0001fc55      0x34a ./Core/Src/main.o
- .debug_macro   0x0001ff9f      0x53c ./Core/Src/main.o
- .debug_macro   0x000204db      0x18b ./Core/Src/main.o
- .debug_macro   0x00020666       0x43 ./Core/Src/main.o
- .debug_macro   0x000206a9      0x23d ./Core/Src/main.o
- .debug_macro   0x000208e6      0x211 ./Core/Src/main.o
- .debug_macro   0x00020af7      0x6bd ./Core/Src/main.o
- .debug_macro   0x000211b4      0x45c ./Core/Src/main.o
- .debug_macro   0x00021610      0x11c ./Core/Src/main.o
- .debug_macro   0x0002172c      0x122 ./Core/Src/main.o
- .debug_macro   0x0002184e      0x3d1 ./Core/Src/main.o
- .debug_macro   0x00021c1f      0x693 ./Core/Src/main.o
- .debug_macro   0x000222b2       0xa6 ./Core/Src/main.o
- .debug_macro   0x00022358      0x358 ./Core/Src/main.o
- .debug_macro   0x000226b0      0x1ce ./Core/Src/stm32g4xx_hal_msp.o
- .debug_macro   0x0002287e      0x1d8 ./Core/Src/stm32g4xx_it.o
- .debug_macro   0x00022a56      0x1c4 ./Core/Src/system_stm32g4xx.o
- .debug_macro   0x00022c1a       0xdb ./Drivers/CustomDrivers/Src/uart_test.o
- .debug_macro   0x00022cf5      0x212 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.o
- .debug_macro   0x00022f07      0x1c4 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_cortex.o
- .debug_macro   0x000230cb      0x2d6 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_fdcan.o
- .debug_macro   0x000233a1      0x1cb ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_gpio.o
- .debug_macro   0x0002356c      0x1ee ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_pwr_ex.o
- .debug_macro   0x0002375a      0x206 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc.o
- .debug_macro   0x00023960      0x1ee ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc_ex.o
- .debug_macro   0x00023b4e      0x1ef ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart.o
- .debug_macro   0x00023d3d      0x1d0 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart_ex.o
+ .debug_macro   0x000001dc      0x1ce ./Core/Src/stm32g4xx_hal_msp.o
+ .debug_macro   0x000003aa      0x1d8 ./Core/Src/stm32g4xx_it.o
+ .debug_macro   0x00000582      0x1c4 ./Core/Src/system_stm32g4xx.o
+ .debug_macro   0x00000746       0xdb ./Drivers/CustomDrivers/Src/uart_test.o
+ .debug_macro   0x00000821      0x212 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal.o
+ .debug_macro   0x00000a33      0x1c4 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_cortex.o
+ .debug_macro   0x00000bf7      0x2d6 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_fdcan.o
+ .debug_macro   0x00000ecd      0x1cb ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_gpio.o
+ .debug_macro   0x00001098      0x1ee ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_pwr_ex.o
+ .debug_macro   0x00001286      0x206 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc.o
+ .debug_macro   0x0000148c      0x1ee ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_rcc_ex.o
+ .debug_macro   0x0000167a      0x1ef ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart.o
+ .debug_macro   0x00001869      0x1d0 ./Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_uart_ex.o
 
 .debug_line     0x00000000     0xd6f9
  .debug_line    0x00000000      0x8fd ./Core/Src/main.o
