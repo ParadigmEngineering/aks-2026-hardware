@@ -30,7 +30,14 @@ bool Drive_Init(FDCAN_HandleTypeDef *hfdcan, uint8_t mcu_address) {
 		return false;
 	}
 
-
+	HAL_FDCAN_ActivateNotification(hfdcan,
+			FDCAN_IT_RX_FIFO0_NEW_MESSAGE) |
+			FDCAN_IT_RX_FIFO1_NEW_MESSAGE |
+			FDCAN_IT_BUS_OFF |
+			FDCAN_IT_ERROR_LOG_OVERFLOW |
+			FDCAN_IT_ERROR_PASSIVE |
+			FDCAN_IT_ERROR_WARNING,
+			0);
 }
 
 static void ConfigureFDCANFilter() {
@@ -53,4 +60,12 @@ static void ConfigureFDCANFilter() {
 	filter_config.FilterIndex = 1;
     filter_config.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
     HAL_FDCAN_ConfigFilter(drive.hfdcan, &filter_config);
+
+    // Configure global filter to reject non-matching frames
+    HAL_FDCAN_ConfigGlobalFilter(
+    	drive.hfdcan,
+		FDCAN_REJECT, // Non-matching STD -> Reject
+		FDCAN_ACCEPT_IN_RX_FIFO0, // Non-matching EXT -> Accept to FIFO
+		FDCAN_REJECT, // STD remote -> Reject
+		FDCAN_REJECT); // STD remote -> Reject
 }

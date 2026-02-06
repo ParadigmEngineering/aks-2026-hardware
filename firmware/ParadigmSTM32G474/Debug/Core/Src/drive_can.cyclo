@@ -1,2 +1,0 @@
-../Core/Src/drive_can.c:15:6:Drive_Init	3
-../Core/Src/drive_can.c:35:13:ConfigureFDCANFilter	2
