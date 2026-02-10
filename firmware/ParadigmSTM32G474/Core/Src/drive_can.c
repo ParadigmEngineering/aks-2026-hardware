@@ -69,3 +69,12 @@ static void ConfigureFDCANFilter() {
 		FDCAN_REJECT, // STD remote -> Reject
 		FDCAN_REJECT); // STD remote -> Reject
 }
+
+bool Send_Handshake() {
+	uint8_t handshake_data[8] = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA};
+	SendFDCANFrame(CAN_ID_VCU_TO_MCU, handshake_data, 8);
+}
+
+bool Drive_Stop() {
+
+}
