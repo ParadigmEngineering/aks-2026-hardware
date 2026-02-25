@@ -12,6 +12,12 @@ DriveController_t drive;
 
 static void ConfigureFDCANFilter();
 
+//Private helpers
+static bool SendFDCANFrame(uint32_t ext_id, const uint8_t *data, uint8_t len) {
+	FDCAN_TxHeaderTypeDef = {0};
+	hdr.Indentifier = ext_id;
+}
+
 bool Drive_Init(FDCAN_HandleTypeDef *hfdcan, uint8_t mcu_address) {
 
 	if (hfdcan == NULL) {
@@ -30,14 +36,17 @@ bool Drive_Init(FDCAN_HandleTypeDef *hfdcan, uint8_t mcu_address) {
 		return false;
 	}
 
-	HAL_FDCAN_ActivateNotification(hfdcan,
-			FDCAN_IT_RX_FIFO0_NEW_MESSAGE) |
-			FDCAN_IT_RX_FIFO1_NEW_MESSAGE |
+	if (HAL_FDCAN_ActivateNotification(hfdcan,
+			FDCAN_IT_RX_FIFO0_NEW_MESSAGE |
 			FDCAN_IT_BUS_OFF |
-			FDCAN_IT_ERROR_LOG_OVERFLOW |
 			FDCAN_IT_ERROR_PASSIVE |
 			FDCAN_IT_ERROR_WARNING,
-			0);
+			0) != HAL_OK) {
+		return false;
+	}
+
+	drive.last_tx_tick = HAL_GetTick();
+	return true;
 }
 
 static void ConfigureFDCANFilter() {
