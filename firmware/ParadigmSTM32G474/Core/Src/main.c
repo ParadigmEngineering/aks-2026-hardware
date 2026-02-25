@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "uart_test.h"
+#include "drive_can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +42,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 FDCAN_HandleTypeDef hfdcan2;
-
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
@@ -55,6 +55,12 @@ uint8_t TxData[8];
 uint8_t RxData[8];
 
 uint32_t msg_count = 0;
+
+
+
+static int16_t g_target_current = 0;
+static int16_t g_target_speed = 0;
+static DriveCommand_t g_command = CMD_HALTED;
 
 /* USER CODE END PV */
 
@@ -108,7 +114,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   initUART();
 
-  HAL_FDCAN_Start(&hfdcan2);
+  if (!Drive_Init(&hfdcan2, MCU_ADDRESS_DEFAULT)) {
+	  Error_Handler();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
