@@ -62,6 +62,8 @@ static int16_t g_target_current = 0;
 static int16_t g_target_speed = 0;
 static DriveCommand_t g_command = CMD_HALTED;
 
+extern DriveController_t drive;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,6 +125,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*
 	  uint8_t tx = 0x55;
 	  uint8_t rx = 0;
 
@@ -137,6 +140,10 @@ int main(void)
 		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 		  HAL_Delay(2000);
 	  }
+	*/
+
+	Drive_SendHandshake();
+	HAL_Delay(1000);
 
   }
     /* USER CODE END WHILE */
@@ -216,7 +223,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 1;
+  hfdcan2.Init.ExtFiltersNbr = 2;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
