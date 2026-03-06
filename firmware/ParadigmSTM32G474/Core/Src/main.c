@@ -64,6 +64,7 @@ static DriveCommand_t g_command = CMD_HALTED;
 
 static uint8_t ramp_step = 1;
 static int16_t ramp_speed_rpm = 0;
+static float ramp_current_A = 0.0f;
 static uint32_t ramp_last_tick = 0;
 
 extern DriveController_t drive;
@@ -311,135 +312,179 @@ int main(void)
 		  HAL_Delay(2000);
 	  }
 	*/
-	  /* Run the fake MCU every iteration — internally gates to 50ms */
-	          FakeMCU_Tick();
 
-	          /* Safety: halt on fault or comms failure */
-	          if (Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
-	          {
-	              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-	              g_command        = CMD_HALTED;
-	              FakeMCU_ReceiveCommand();
-	              HAL_Delay(10);
-	              continue;
-	          }
+      /* --------------------------------------------------------
+       * Safety: halt immediately on fault or comms failure
+       * ----------------------------------------------------- */
+      if (Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
+      {
+          g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+          g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+          g_command        = CMD_HALTED;
+          ramp_step        = 0;
+          HAL_Delay(10);
+          continue;
+      }
 
-	          uint32_t now = HAL_GetTick();
+      uint32_t now = HAL_GetTick();
 
-	          switch (ramp_step)
-	          {
-	              /* Step 0: wait for handshake */
-	              case 0:
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-	                  g_command        = CMD_HALTED;
-	                  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
-	                  {
-	                      ramp_speed_rpm = 0;
-	                      ramp_last_tick = now;
-	                      ramp_step      = 1;
-	                  }
-	                  break;
+      switch (ramp_step)
+      {
+          /* --------------------------------------------------
+           * Step 0: Wait for handshake
+           * Drive_Tick sends 0xAA every 50ms automatically.
+           * Board 2 sends 0x55, handshake completes.
+           * ------------------------------------------------ */
+          case 0:
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_command        = CMD_HALTED;
+              if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
+              {
+                  ramp_speed_rpm = 0;
+                  ramp_last_tick = now;
+                  ramp_step      = 1;
+              }
+              break;
 
-	              /* Step 1: ramp up 0 → 500rpm (+10rpm every 100ms = 5s) */
-	              case 1:
-	                  if (now - ramp_last_tick >= 100)
-	                  {
-	                      ramp_last_tick  = now;
-	                      ramp_speed_rpm += 10;
-	                      if (ramp_speed_rpm >= 500)
-	                      {
-	                          ramp_speed_rpm = 500;
-	                          ramp_step      = 2;
-	                          ramp_last_tick = now;
-	                      }
-	                  }
-	                  g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  break;
+          /* --------------------------------------------------
+           * Steps 1-3: Speed mode ramp test
+           * target_current = 0, MCU controls current
+           * ------------------------------------------------ */
 
-	              /* Step 2: hold 500rpm for 3 seconds */
-	              case 2:
-	                  g_target_speed   = DRIVE_ENCODE_SPEED(500.0f);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  if (now - ramp_last_tick >= 3000)
-	                  {
-	                      ramp_last_tick = now;
-	                      ramp_step      = 3;
-	                  }
-	                  break;
+          /* Step 1: ramp up 0 → 1000rpm (+10rpm / 100ms = 10s) */
+          case 1:
+              if (now - ramp_last_tick >= 100)
+              {
+                  ramp_last_tick  = now;
+                  ramp_speed_rpm += 10;
+                  if (ramp_speed_rpm >= 1000)
+                  {
+                      ramp_speed_rpm = 1000;
+                      ramp_step      = 2;
+                      ramp_last_tick = now;
+                  }
+              }
+              g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+              break;
 
-	              /* Step 3: ramp up 500 → 1000rpm */
-	              case 3:
-	                  if (now - ramp_last_tick >= 100)
-	                  {
-	                      ramp_last_tick  = now;
-	                      ramp_speed_rpm += 10;
-	                      if (ramp_speed_rpm >= 1000)
-	                      {
-	                          ramp_speed_rpm = 1000;
-	                          ramp_step      = 4;
-	                          ramp_last_tick = now;
-	                      }
-	                  }
-	                  g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  break;
+          /* Step 2: hold 1000rpm for 5 seconds */
+          case 2:
+              g_target_speed   = DRIVE_ENCODE_SPEED(1000.0f);
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+              if (now - ramp_last_tick >= 5000)
+              {
+                  ramp_last_tick = now;
+                  ramp_step      = 3;
+              }
+              break;
 
-	              /* Step 4: hold 1000rpm for 3 seconds */
-	              case 4:
-	                  g_target_speed   = DRIVE_ENCODE_SPEED(1000.0f);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  if (now - ramp_last_tick >= 3000)
-	                  {
-	                      ramp_last_tick = now;
-	                      ramp_step      = 5;
-	                  }
-	                  break;
+          /* Step 3: ramp down 1000 → 0rpm */
+          case 3:
+              if (now - ramp_last_tick >= 100)
+              {
+                  ramp_last_tick  = now;
+                  ramp_speed_rpm -= 10;
+                  if (ramp_speed_rpm <= 0)
+                  {
+                      ramp_speed_rpm = 0;
+                      ramp_step      = 4;
+                      ramp_last_tick = now;
+                  }
+              }
+              g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+              break;
 
-	              /* Step 5: ramp down 1000 → 0rpm */
-	              case 5:
-	                  if (now - ramp_last_tick >= 100)
-	                  {
-	                      ramp_last_tick  = now;
-	                      ramp_speed_rpm -= 10;
-	                      if (ramp_speed_rpm <= 0)
-	                      {
-	                          ramp_speed_rpm = 0;
-	                          ramp_step      = 6;
-	                          ramp_last_tick = now;
-	                      }
-	                  }
-	                  g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  break;
+          /* Step 4: halt cleanly before switching modes */
+          case 4:
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_command        = CMD_HALTED;
+              if (now - ramp_last_tick >= 1000)
+              {
+                  ramp_current_A = 0.0f;
+                  ramp_last_tick = now;
+                  ramp_step      = 5;
+              }
+              break;
 
-	              /* Step 6: hold 0rpm for 3 seconds then loop */
-	              case 6:
-	                  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-	                  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-	                  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	                  if (now - ramp_last_tick >= 3000)
-	                  {
-	                      ramp_speed_rpm = 0;
-	                      ramp_last_tick = now;
-	                      ramp_step      = 1;
-	                  }
-	                  break;
+          /* --------------------------------------------------
+           * Steps 5-7: Torque mode ramp test
+           * target_speed = 0, current controls torque
+           * ------------------------------------------------ */
 
-	              default:
-	                  ramp_step = 0;
-	                  break;
-	          }
+          /* Step 5: ramp up torque 0 → 20A (+1A / 100ms = 2s) */
+          case 5:
+              if (now - ramp_last_tick >= 100)
+              {
+                  ramp_last_tick  = now;
+                  ramp_current_A += 1.0f;
+                  if (ramp_current_A >= 20.0f)
+                  {
+                      ramp_current_A = 20.0f;
+                      ramp_step      = 6;
+                      ramp_last_tick = now;
+                  }
+              }
+              g_target_current = DRIVE_ENCODE_CURRENT(ramp_current_A);
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_command        = CMD_RUNNING;
+              break;
 
-	          FakeMCU_ReceiveCommand();
-	          HAL_Delay(10);
+          /* Step 6: hold 20A torque for 3 seconds */
+          case 6:
+              g_target_current = DRIVE_ENCODE_CURRENT(20.0f);
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_command        = CMD_RUNNING;
+              if (now - ramp_last_tick >= 3000)
+              {
+                  ramp_last_tick = now;
+                  ramp_step      = 7;
+              }
+              break;
+
+          /* Step 7: ramp current back to 0 */
+          case 7:
+              if (now - ramp_last_tick >= 100)
+              {
+                  ramp_last_tick  = now;
+                  ramp_current_A -= 1.0f;
+                  if (ramp_current_A <= 0.0f)
+                  {
+                      ramp_current_A = 0.0f;
+                      ramp_step      = 8;
+                      ramp_last_tick = now;
+                  }
+              }
+              g_target_current = DRIVE_ENCODE_CURRENT(ramp_current_A);
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_command        = CMD_RUNNING;
+              break;
+
+          /* Step 8: halt and loop back to speed mode */
+          case 8:
+              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+              g_command        = CMD_HALTED;
+              if (now - ramp_last_tick >= 1000)
+              {
+                  ramp_speed_rpm = 0;
+                  ramp_last_tick = now;
+                  ramp_step      = 1;
+              }
+              break;
+
+          default:
+              ramp_step = 0;
+              break;
+      }
+
+      HAL_Delay(10);
 
   }
     /* USER CODE END WHILE */
