@@ -42,199 +42,28 @@
 
 /* Private variables ---------------------------------------------------------*/
 FDCAN_HandleTypeDef hfdcan2;
+
+TIM_HandleTypeDef htim1;
+
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+/* Latest measured pulse widths — updated in input capture callback */
+static volatile uint32_t g_throttle_us    = 1500;  /* default = centre  */
+static volatile uint32_t g_estop_us       = 1200;  /* default = inactive */
+static volatile uint32_t g_last_pulse_ms  = 0;     /* for signal-lost detection */
 
-FDCAN_TxHeaderTypeDef TxHeader;
-FDCAN_RxHeaderTypeDef RxHeader;
-
-uint32_t TxMailbox;
-
-uint8_t TxData[8];
-uint8_t RxData[8];
-
-uint32_t msg_count = 0;
-
-
+/* Rise-edge timestamps and fall-edge flags for each channel */
+static volatile uint32_t g_ch1_rise = 0;
+static volatile uint32_t g_ch2_rise = 0;
+static volatile uint8_t  g_ch1_fall = 0;
+static volatile uint8_t  g_ch2_fall = 0;
 
 static int16_t g_target_current = 0;
 static int16_t g_target_speed = 0;
 static DriveCommand_t g_command = CMD_HALTED;
 
-static uint8_t ramp_step = 1;
-static int16_t ramp_speed_rpm = 0;
-static float ramp_current_A = 0.0f;
-static uint32_t ramp_last_tick = 0;
-
 extern DriveController_t drive;
-
-
-
-typedef struct {
-    float    actual_speed_rpm;
-    float    commanded_speed_rpm;
-    float    actual_current_A;
-    float    bus_voltage_V;
-    float    ctrl_temp_C;
-    float    motor_temp_C;
-    uint8_t  life_signal;
-    bool     is_running;
-    bool     is_speed_mode;
-    bool     handshake_done;
-    uint32_t last_tx_tick;
-} FakeMCU_t;
-
-static FakeMCU_t mcu = {
-    .bus_voltage_V = 48.0f,
-    .ctrl_temp_C   = 25.0f,
-    .motor_temp_C  = 25.0f,
-};
-
-/*
- * Transmit one extended CAN frame from the fake MCU side.
- * Uses the same FDCAN peripheral as the VCU — in loopback mode
- * both sets of frames are received back.
- */
-static bool FakeMCU_Transmit(uint32_t id, const uint8_t *data)
-{
-    FDCAN_TxHeaderTypeDef hdr = {0};
-    hdr.Identifier          = id;
-    hdr.IdType              = FDCAN_EXTENDED_ID;
-    hdr.TxFrameType         = FDCAN_DATA_FRAME;
-    hdr.DataLength          = FDCAN_DLC_BYTES_8;
-    hdr.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    hdr.BitRateSwitch       = FDCAN_BRS_OFF;
-    hdr.FDFormat            = FDCAN_CLASSIC_CAN;
-    hdr.TxEventFifoControl  = FDCAN_NO_TX_EVENTS;
-    hdr.MessageMarker       = 0;
-
-    return HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &hdr, (uint8_t *)data) == HAL_OK;
-}
-
-/* Update fake MCU with latest VCU command */
-static void FakeMCU_ReceiveCommand()
-{
-    mcu.commanded_speed_rpm = (float)g_target_speed - 32000.0f;
-    mcu.is_running          = (g_command & CMD_RUNNING)    != 0;
-    mcu.is_speed_mode       = (g_command & CMD_SPEED_MODE) != 0;
-}
-
-/*
- * Periodic fake MCU tick — call every loop iteration.
- * Internally gates to 50ms.
- *
- * Transmits real FDCAN frames that loop back through the filters
- * and fire the Rx callbacks
- */
-static void FakeMCU_Tick()
-{
-    uint32_t now = HAL_GetTick();
-    if ((now - mcu.last_tx_tick) < 50) { return; }
-    mcu.last_tx_tick = now;
-
-    /* -----------------------------------------------------------
-     * Handshake: transmit 8 × 0x55 on Status1 ID until the VCU
-     * transitions to OPERATIONAL
-     * --------------------------------------------------------- */
-    if (!mcu.handshake_done)
-    {
-        uint8_t hs[8];
-        memset(hs, MCU_HANDSHAKE_BYTE, 8);
-
-        /*
-         * This frame travels through the FDCAN peripheral:
-         *   TX FIFO → loopback → filter 0 (0x1801D0EF exact match)
-         *   → FIFO0 → HAL_FDCAN_RxFifo0MsgPendingCallback
-         *   → Drive_ProcessRx → state = OPERATIONAL
-         */
-        FakeMCU_Transmit(CAN_ID_MCU_STATUS1, hs);
-
-        if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
-        {
-            mcu.handshake_done = true;
-        }
-        return;
-    }
-
-    /* -----------------------------------------------------------
-     * Motor physics simulation
-     *
-     * Speed: first-order lag, 5% of remaining error per tick
-     * Current: proportional to speed error
-     * Temperature: rises with current, cools when idle
-     * Voltage: sags under load
-     * --------------------------------------------------------- */
-    if (mcu.is_running && mcu.is_speed_mode)
-    {
-        float error          = mcu.commanded_speed_rpm - mcu.actual_speed_rpm;
-        mcu.actual_speed_rpm += error * 0.05f;
-
-        mcu.actual_current_A  = (error < 0.0f ? -error : error) * 0.01f;
-        mcu.motor_temp_C     += (mcu.actual_current_A * 0.002f) - 0.001f;
-        mcu.ctrl_temp_C      += (mcu.actual_current_A * 0.001f) - 0.001f;
-    }
-    else
-    {
-        mcu.actual_speed_rpm *= 0.90f;
-        mcu.actual_current_A  = 0.0f;
-        mcu.motor_temp_C     -= 0.01f;
-        mcu.ctrl_temp_C      -= 0.005f;
-    }
-
-    if (mcu.motor_temp_C < 25.0f) { mcu.motor_temp_C = 25.0f; }
-    if (mcu.ctrl_temp_C  < 25.0f) { mcu.ctrl_temp_C  = 25.0f; }
-    mcu.bus_voltage_V = 48.0f - (mcu.actual_current_A * 0.05f);
-
-    /* -----------------------------------------------------------
-     * Transmit Status1: voltage, bus current, phase current, speed
-     *
-     * This frame travels:
-     *   TX FIFO → loopback → filter 0 (0x1801D0EF)
-     *   → FIFO0 → callback → Drive_ProcessRx → ParseStatus1
-     *   → drive.status updated
-     * --------------------------------------------------------- */
-    {
-        uint16_t raw_v  = (uint16_t)(mcu.bus_voltage_V / 0.1f);
-        uint16_t raw_bi = (uint16_t)((mcu.actual_current_A / 0.1f) + 32000.0f);
-        uint16_t raw_pi = (uint16_t)((mcu.actual_current_A / 0.1f) + 32000.0f);
-        uint16_t raw_sp = (uint16_t)(mcu.actual_speed_rpm + 32000.0f);
-
-        uint8_t s1[8] = {
-            (uint8_t)(raw_v  & 0xFF), (uint8_t)(raw_v  >> 8),
-            (uint8_t)(raw_bi & 0xFF), (uint8_t)(raw_bi >> 8),
-            (uint8_t)(raw_pi & 0xFF), (uint8_t)(raw_pi >> 8),
-            (uint8_t)(raw_sp & 0xFF), (uint8_t)(raw_sp >> 8),
-        };
-        FakeMCU_Transmit(CAN_ID_MCU_STATUS1, s1);
-    }
-
-    /* -----------------------------------------------------------
-     * Transmit Status2: temperatures, status byte, life signal
-     *
-     * This frame travels:
-     *   TX FIFO → loopback → filter 1 (0x1802D0EF)
-     *   → FIFO1 → callback → Drive_ProcessRx → ParseStatus2
-     *   → drive.status updated, life signal checked
-     * --------------------------------------------------------- */
-    {
-        uint8_t raw_ct = (uint8_t)(mcu.ctrl_temp_C  + 40.0f);
-        uint8_t raw_mt = (uint8_t)(mcu.motor_temp_C + 40.0f);
-        uint8_t status = (mcu.is_running    ? 0x01 : 0x00)
-                       | (mcu.is_speed_mode ? 0x02 : 0x00);
-
-        uint8_t s2[8] = {
-            raw_ct,
-            raw_mt,
-            status,
-            0x00, 0x00, 0x00,   /* no error flags */
-            0x00,
-            mcu.life_signal++   /* must increment — driver checks this */
-        };
-        FakeMCU_Transmit(CAN_ID_MCU_STATUS2, s2);
-    }
-}
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -242,6 +71,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_FDCAN2_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -284,214 +114,84 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_FDCAN2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   initUART();
 
   if (!Drive_Init(&hfdcan2, MCU_ADDRESS_DEFAULT)) {
 	  Error_Handler();
   }
+
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1); // throttle
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2); // e-stop
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  while (1) {
 	  /*
-	  uint8_t tx = 0x55;
-	  uint8_t rx = 0;
-
-	  transmitUart(tx);
-
-	  while ((USART1->ISR & USART_ISR_RXNE) == 0); // Wait until something arrives
-
-	  rx = receiveUart();
-
-	  if (rx == tx)
-	  {
-		  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		  HAL_Delay(2000);
+	  // Halt on fault or comms failure
+	  if (Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
+		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_command        = CMD_HALTED;
+		  HAL_Delay(10);
+		  continue;
 	  }
-	*/
 
-      /* --------------------------------------------------------
-       * Safety: halt immediately on fault or comms failure
-       * ----------------------------------------------------- */
-      if (Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
-      {
-          g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-          g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-          g_command        = CMD_HALTED;
-          ramp_step        = 0;
-          HAL_Delay(10);
-          continue;
-      }
+	  // Command 100rpm once the handshake is complete
+	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
+		  g_target_speed   = DRIVE_ENCODE_SPEED(100.0f);
+		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+	  }
 
-      uint32_t now = HAL_GetTick();
+	  HAL_Delay(10);
+	  */
 
-      switch (ramp_step)
-      {
-          /* --------------------------------------------------
-           * Step 0: Wait for handshake
-           * Drive_Tick sends 0xAA every 50ms automatically.
-           * Board 2 sends 0x55, handshake completes.
-           * ------------------------------------------------ */
-          case 0:
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_command        = CMD_HALTED;
-              if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
-              {
-                  ramp_speed_rpm = 0;
-                  ramp_last_tick = now;
-                  ramp_step      = 1;
-              }
-              break;
+	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
+	  bool estopped  = !signal_ok || (g_estop_us < 1500);
 
-          /* --------------------------------------------------
-           * Steps 1-3: Speed mode ramp test
-           * target_current = 0, MCU controls current
-           * ------------------------------------------------ */
+	  // ---- E-stop or signal lost ----
+	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
+	  {
+		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_command        = CMD_HALTED;
+		  HAL_Delay(10);
+		  continue;
+	  }
 
-          /* Step 1: ramp up 0 → 1000rpm (+10rpm / 100ms = 10s) */
-          case 1:
-              if (now - ramp_last_tick >= 100)
-              {
-                  ramp_last_tick  = now;
-                  ramp_speed_rpm += 10;
-                  if (ramp_speed_rpm >= 1000)
-                  {
-                      ramp_speed_rpm = 1000;
-                      ramp_step      = 2;
-                      ramp_last_tick = now;
-                  }
-              }
-              g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-              break;
+	  // ---- Normal operation ----
+	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
+	  {
+		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
+		  int32_t deviation = (int32_t)g_throttle_us - 1500;
+		  int32_t target    = 0;
 
-          /* Step 2: hold 1000rpm for 5 seconds */
-          case 2:
-              g_target_speed   = DRIVE_ENCODE_SPEED(1000.0f);
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-              if (now - ramp_last_tick >= 5000)
-              {
-                  ramp_last_tick = now;
-                  ramp_step      = 3;
-              }
-              break;
+		  if (deviation > 50)
+			  target = ((deviation - 50) * 1000) / 450;
+		  else if (deviation < -50)
+			  target = ((deviation + 50) * 1000) / 450;
 
-          /* Step 3: ramp down 1000 → 0rpm */
-          case 3:
-              if (now - ramp_last_tick >= 100)
-              {
-                  ramp_last_tick  = now;
-                  ramp_speed_rpm -= 10;
-                  if (ramp_speed_rpm <= 0)
-                  {
-                      ramp_speed_rpm = 0;
-                      ramp_step      = 4;
-                      ramp_last_tick = now;
-                  }
-              }
-              g_target_speed   = DRIVE_ENCODE_SPEED((float)ramp_speed_rpm);
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-              break;
+		  if (target >  1000) { target =  1000; }
+		  if (target < -1000) { target = -1000; }
 
-          /* Step 4: halt cleanly before switching modes */
-          case 4:
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_command        = CMD_HALTED;
-              if (now - ramp_last_tick >= 1000)
-              {
-                  ramp_current_A = 0.0f;
-                  ramp_last_tick = now;
-                  ramp_step      = 5;
-              }
-              break;
+		  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
+		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+	  }
 
-          /* --------------------------------------------------
-           * Steps 5-7: Torque mode ramp test
-           * target_speed = 0, current controls torque
-           * ------------------------------------------------ */
-
-          /* Step 5: ramp up torque 0 → 20A (+1A / 100ms = 2s) */
-          case 5:
-              if (now - ramp_last_tick >= 100)
-              {
-                  ramp_last_tick  = now;
-                  ramp_current_A += 1.0f;
-                  if (ramp_current_A >= 20.0f)
-                  {
-                      ramp_current_A = 20.0f;
-                      ramp_step      = 6;
-                      ramp_last_tick = now;
-                  }
-              }
-              g_target_current = DRIVE_ENCODE_CURRENT(ramp_current_A);
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_command        = CMD_RUNNING;
-              break;
-
-          /* Step 6: hold 20A torque for 3 seconds */
-          case 6:
-              g_target_current = DRIVE_ENCODE_CURRENT(20.0f);
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_command        = CMD_RUNNING;
-              if (now - ramp_last_tick >= 3000)
-              {
-                  ramp_last_tick = now;
-                  ramp_step      = 7;
-              }
-              break;
-
-          /* Step 7: ramp current back to 0 */
-          case 7:
-              if (now - ramp_last_tick >= 100)
-              {
-                  ramp_last_tick  = now;
-                  ramp_current_A -= 1.0f;
-                  if (ramp_current_A <= 0.0f)
-                  {
-                      ramp_current_A = 0.0f;
-                      ramp_step      = 8;
-                      ramp_last_tick = now;
-                  }
-              }
-              g_target_current = DRIVE_ENCODE_CURRENT(ramp_current_A);
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_command        = CMD_RUNNING;
-              break;
-
-          /* Step 8: halt and loop back to speed mode */
-          case 8:
-              g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-              g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-              g_command        = CMD_HALTED;
-              if (now - ramp_last_tick >= 1000)
-              {
-                  ramp_speed_rpm = 0;
-                  ramp_last_tick = now;
-                  ramp_step      = 1;
-              }
-              break;
-
-          default:
-              ramp_step = 0;
-              break;
-      }
-
-      HAL_Delay(10);
+	  HAL_Delay(10);
 
   }
+}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   /* USER CODE END 3 */
-}
 
 /**
   * @brief System Clock Configuration
@@ -564,7 +264,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 2;
+  hfdcan2.Init.ExtFiltersNbr = 1;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
@@ -573,6 +273,71 @@ static void MX_FDCAN2_Init(void)
   /* USER CODE BEGIN FDCAN2_Init 2 */
 
   /* USER CODE END FDCAN2_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 65535;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+  HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
+  /* USER CODE END TIM1_Init 2 */
 
 }
 
@@ -653,12 +418,109 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  /* PA8: TIM1 CH1 throttle   PA9: TIM1 CH2 e-stop */
+  GPIO_InitStruct.Pin       = GPIO_PIN_8 | GPIO_PIN_9;
+  GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    if (htim->Instance != TIM1) return;
 
+    uint32_t now = HAL_GetTick();
+
+    // --- E-stop: Channel 1 ---
+    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+    {
+        if (g_ch1_fall == 0)
+        {
+            // Rising edge — record start
+            g_ch1_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
+                                          TIM_INPUTCHANNELPOLARITY_FALLING);
+            g_ch1_fall = 1;
+        }
+        else
+        {
+            // Falling edge — measure width
+            uint32_t end = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+            uint32_t width = (end >= g_ch1_rise)
+                             ? (end - g_ch1_rise)
+                             : (65535 - g_ch1_rise + end + 1); // overflow safe
+
+            // TIM1 prescaler=0, 16MHz clock → 1 tick = 62.5ns
+            // Convert ticks to microseconds: divide by 16
+            g_estop_us    = width / 16;
+            g_last_pulse_ms  = now;
+
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
+                                          TIM_INPUTCHANNELPOLARITY_RISING);
+            g_ch1_fall = 0;
+        }
+    }
+
+    // --- Throttle: Channel 2 ---
+    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+    {
+        if (g_ch2_fall == 0)
+        {
+            g_ch2_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,
+                                          TIM_INPUTCHANNELPOLARITY_FALLING);
+            g_ch2_fall = 1;
+        }
+        else
+        {
+            uint32_t end = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+            uint32_t width = (end >= g_ch2_rise)
+                             ? (end - g_ch2_rise)
+                             : (65535 - g_ch2_rise + end + 1);
+
+            g_throttle_us = width / 16;
+
+            __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,
+                                          TIM_INPUTCHANNELPOLARITY_RISING);
+            g_ch2_fall = 0;
+        }
+    }
+}
+
+void HAL_SYSTICK_Callback() {
+	Drive_Tick(g_target_current, g_target_speed, g_command);
+}
+
+void HAL_FDCAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hfdcan) {
+	FDCAN_RxHeaderTypeDef hdr;
+	uint8_t data[8];
+	while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &hdr, data) == HAL_OK)
+	{
+	  Drive_ProcessRx(&hdr, data);
+	}
+}
+
+void HAL_FDCAN_RxFifo1MsgPendingCallback(FDCAN_HandleTypeDef *hfdcan) {
+	FDCAN_RxHeaderTypeDef hdr;
+	uint8_t data[8];
+	while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &hdr, data) == HAL_OK)
+	{
+	  Drive_ProcessRx(&hdr, data);
+	}
+}
+
+void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t ErrorStatusITs) {
+	if (ErrorStatusITs & FDCAN_IT_BUS_OFF)
+	{
+	  HAL_FDCAN_Stop(hfdcan);
+	  Drive_Init(hfdcan, MCU_ADDRESS_DEFAULT);
+	}
+}
 /* USER CODE END 4 */
 
 /**

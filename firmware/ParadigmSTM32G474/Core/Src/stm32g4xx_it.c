@@ -57,7 +57,7 @@
 /* External variables --------------------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan2;
 /* USER CODE BEGIN EV */
-
+extern TIM_HandleTypeDef htim1;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -227,5 +227,10 @@ void FDCAN2_IT1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+void TIM1_CC_IRQHandler(void)
+{
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    HAL_TIM_IRQHandler(&htim1);
 
+}
 /* USER CODE END 1 */
