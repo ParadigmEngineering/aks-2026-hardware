@@ -37,7 +37,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define MAX_RPM 100
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -171,12 +171,12 @@ int main(void)
 		  int32_t target    = 0;
 
 		  if (deviation > 50)
-			  target = ((deviation - 50) * 1000) / 450;
+			  target = ((deviation - 50) * MAX_RPM) / 450;
 		  else if (deviation < -50)
-			  target = ((deviation + 50) * 1000) / 450;
+			  target = ((deviation + 50) * MAX_RPM) / 450;
 
-		  if (target >  1000) { target =  1000; }
-		  if (target < -1000) { target = -1000; }
+		  if (target >  MAX_RPM) { target =  MAX_RPM; }
+		  if (target < -MAX_RPM) { target = -MAX_RPM; }
 
 		  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
