@@ -151,14 +151,17 @@ int main(void)
 	  */
 
 	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
-	  bool estopped  = !signal_ok || (g_estop_us < 1500);
+	  bool estopped  = !signal_ok || (g_estop_us > 1500);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
-	  // ---- E-stop or signal lost ----
+
+	  //  E-stop or signal lost
 	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
 	  {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command        = CMD_HALTED;
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
 		  HAL_Delay(10);
 		  continue;
 	  }
@@ -410,12 +413,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* PA8: TIM1 CH1 throttle   PA9: TIM1 CH2 e-stop */
