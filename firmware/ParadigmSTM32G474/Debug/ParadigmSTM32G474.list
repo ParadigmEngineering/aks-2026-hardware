@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00026d31  00000000  00000000  0002225e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00014acc  00000000  00000000  00048f8f  2**0
+ 17 .debug_line   00014aca  00000000  00000000  00048f8f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00100b97  00000000  00000000  0005da5b  2**0
+ 18 .debug_str    00100b97  00000000  00000000  0005da59  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  0015e5f2  2**0
+ 19 .comment      00000043  00000000  00000000  0015e5f0  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00005180  00000000  00000000  0015e638  2**2
+ 20 .debug_frame  00005180  00000000  00000000  0015e634  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000007c  00000000  00000000  001637b8  2**0
+ 21 .debug_line_str 0000007c  00000000  00000000  001637b4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1392,10 +1392,10 @@ int main(void)
  8000ba6:	2104      	movs	r1, #4
  8000ba8:	485a      	ldr	r0, [pc, #360]	@ (8000d14 <main+0x1b0>)
  8000baa:	f003 f9c1 	bl	8003f30 <HAL_TIM_IC_Start_IT>
-	  }
 
-	  HAL_Delay(10);
-	  */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1) {
 
 	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
  8000bae:	4b5a      	ldr	r3, [pc, #360]	@ (8000d18 <main+0x1b4>)
@@ -1448,7 +1448,7 @@ int main(void)
  8000c0e:	f7ff ff8d 	bl	8000b2c <Drive_HasError>
  8000c12:	4603      	mov	r3, r0
  8000c14:	2b00      	cmp	r3, #0
- 8000c16:	d013      	beq.n	8000c40 <main+0xdc>
+ 8000c16:	d014      	beq.n	8000c42 <main+0xde>
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
  8000c18:	4b41      	ldr	r3, [pc, #260]	@ (8000d20 <main+0x1bc>)
  8000c1a:	f44f 42fa 	mov.w	r2, #32000	@ 0x7d00
@@ -1469,115 +1469,115 @@ int main(void)
 		  HAL_Delay(10);
  8000c3a:	200a      	movs	r0, #10
  8000c3c:	f000 fe90 	bl	8001960 <HAL_Delay>
+ 8000c40:	e057      	b.n	8000cf2 <main+0x18e>
 	  }
 
 	  // ---- Normal operation ----
-	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
- 8000c40:	f7ff ff68 	bl	8000b14 <Drive_GetState>
- 8000c44:	4603      	mov	r3, r0
- 8000c46:	2b02      	cmp	r3, #2
- 8000c48:	d152      	bne.n	8000cf0 <main+0x18c>
+	  else if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
+ 8000c42:	f7ff ff67 	bl	8000b14 <Drive_GetState>
+ 8000c46:	4603      	mov	r3, r0
+ 8000c48:	2b02      	cmp	r3, #2
+ 8000c4a:	d152      	bne.n	8000cf2 <main+0x18e>
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
- 8000c4a:	2200      	movs	r2, #0
- 8000c4c:	f44f 7100 	mov.w	r1, #512	@ 0x200
- 8000c50:	4836      	ldr	r0, [pc, #216]	@ (8000d2c <main+0x1c8>)
- 8000c52:	f002 f857 	bl	8002d04 <HAL_GPIO_WritePin>
+ 8000c4c:	2200      	movs	r2, #0
+ 8000c4e:	f44f 7100 	mov.w	r1, #512	@ 0x200
+ 8000c52:	4836      	ldr	r0, [pc, #216]	@ (8000d2c <main+0x1c8>)
+ 8000c54:	f002 f856 	bl	8002d04 <HAL_GPIO_WritePin>
 
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
 		  int32_t deviation = (int32_t)g_throttle_us - 1500;
- 8000c56:	4b36      	ldr	r3, [pc, #216]	@ (8000d30 <main+0x1cc>)
- 8000c58:	681b      	ldr	r3, [r3, #0]
- 8000c5a:	f2a3 53dc 	subw	r3, r3, #1500	@ 0x5dc
- 8000c5e:	607b      	str	r3, [r7, #4]
+ 8000c58:	4b35      	ldr	r3, [pc, #212]	@ (8000d30 <main+0x1cc>)
+ 8000c5a:	681b      	ldr	r3, [r3, #0]
+ 8000c5c:	f2a3 53dc 	subw	r3, r3, #1500	@ 0x5dc
+ 8000c60:	607b      	str	r3, [r7, #4]
 		  int32_t target    = 0;
- 8000c60:	2300      	movs	r3, #0
- 8000c62:	60fb      	str	r3, [r7, #12]
+ 8000c62:	2300      	movs	r3, #0
+ 8000c64:	60fb      	str	r3, [r7, #12]
 
 		  if (deviation > 50)
- 8000c64:	687b      	ldr	r3, [r7, #4]
- 8000c66:	2b32      	cmp	r3, #50	@ 0x32
- 8000c68:	dd0d      	ble.n	8000c86 <main+0x122>
+ 8000c66:	687b      	ldr	r3, [r7, #4]
+ 8000c68:	2b32      	cmp	r3, #50	@ 0x32
+ 8000c6a:	dd0d      	ble.n	8000c88 <main+0x124>
 			  target = ((deviation - 50) * MAX_RPM) / 450;
- 8000c6a:	687b      	ldr	r3, [r7, #4]
- 8000c6c:	3b32      	subs	r3, #50	@ 0x32
- 8000c6e:	2264      	movs	r2, #100	@ 0x64
- 8000c70:	fb02 f303 	mul.w	r3, r2, r3
- 8000c74:	4a2f      	ldr	r2, [pc, #188]	@ (8000d34 <main+0x1d0>)
- 8000c76:	fb82 1203 	smull	r1, r2, r2, r3
- 8000c7a:	441a      	add	r2, r3
- 8000c7c:	1212      	asrs	r2, r2, #8
- 8000c7e:	17db      	asrs	r3, r3, #31
- 8000c80:	1ad3      	subs	r3, r2, r3
- 8000c82:	60fb      	str	r3, [r7, #12]
- 8000c84:	e010      	b.n	8000ca8 <main+0x144>
+ 8000c6c:	687b      	ldr	r3, [r7, #4]
+ 8000c6e:	3b32      	subs	r3, #50	@ 0x32
+ 8000c70:	2264      	movs	r2, #100	@ 0x64
+ 8000c72:	fb02 f303 	mul.w	r3, r2, r3
+ 8000c76:	4a2f      	ldr	r2, [pc, #188]	@ (8000d34 <main+0x1d0>)
+ 8000c78:	fb82 1203 	smull	r1, r2, r2, r3
+ 8000c7c:	441a      	add	r2, r3
+ 8000c7e:	1212      	asrs	r2, r2, #8
+ 8000c80:	17db      	asrs	r3, r3, #31
+ 8000c82:	1ad3      	subs	r3, r2, r3
+ 8000c84:	60fb      	str	r3, [r7, #12]
+ 8000c86:	e010      	b.n	8000caa <main+0x146>
 		  else if (deviation < -50)
- 8000c86:	687b      	ldr	r3, [r7, #4]
- 8000c88:	f113 0f32 	cmn.w	r3, #50	@ 0x32
- 8000c8c:	da0c      	bge.n	8000ca8 <main+0x144>
+ 8000c88:	687b      	ldr	r3, [r7, #4]
+ 8000c8a:	f113 0f32 	cmn.w	r3, #50	@ 0x32
+ 8000c8e:	da0c      	bge.n	8000caa <main+0x146>
 			  target = ((deviation + 50) * MAX_RPM) / 450;
- 8000c8e:	687b      	ldr	r3, [r7, #4]
- 8000c90:	3332      	adds	r3, #50	@ 0x32
- 8000c92:	2264      	movs	r2, #100	@ 0x64
- 8000c94:	fb02 f303 	mul.w	r3, r2, r3
- 8000c98:	4a26      	ldr	r2, [pc, #152]	@ (8000d34 <main+0x1d0>)
- 8000c9a:	fb82 1203 	smull	r1, r2, r2, r3
- 8000c9e:	441a      	add	r2, r3
- 8000ca0:	1212      	asrs	r2, r2, #8
- 8000ca2:	17db      	asrs	r3, r3, #31
- 8000ca4:	1ad3      	subs	r3, r2, r3
- 8000ca6:	60fb      	str	r3, [r7, #12]
+ 8000c90:	687b      	ldr	r3, [r7, #4]
+ 8000c92:	3332      	adds	r3, #50	@ 0x32
+ 8000c94:	2264      	movs	r2, #100	@ 0x64
+ 8000c96:	fb02 f303 	mul.w	r3, r2, r3
+ 8000c9a:	4a26      	ldr	r2, [pc, #152]	@ (8000d34 <main+0x1d0>)
+ 8000c9c:	fb82 1203 	smull	r1, r2, r2, r3
+ 8000ca0:	441a      	add	r2, r3
+ 8000ca2:	1212      	asrs	r2, r2, #8
+ 8000ca4:	17db      	asrs	r3, r3, #31
+ 8000ca6:	1ad3      	subs	r3, r2, r3
+ 8000ca8:	60fb      	str	r3, [r7, #12]
 
 		  if (target >  MAX_RPM) { target =  MAX_RPM; }
- 8000ca8:	68fb      	ldr	r3, [r7, #12]
- 8000caa:	2b64      	cmp	r3, #100	@ 0x64
- 8000cac:	dd01      	ble.n	8000cb2 <main+0x14e>
- 8000cae:	2364      	movs	r3, #100	@ 0x64
- 8000cb0:	60fb      	str	r3, [r7, #12]
+ 8000caa:	68fb      	ldr	r3, [r7, #12]
+ 8000cac:	2b64      	cmp	r3, #100	@ 0x64
+ 8000cae:	dd01      	ble.n	8000cb4 <main+0x150>
+ 8000cb0:	2364      	movs	r3, #100	@ 0x64
+ 8000cb2:	60fb      	str	r3, [r7, #12]
 		  if (target < -MAX_RPM) { target = -MAX_RPM; }
- 8000cb2:	68fb      	ldr	r3, [r7, #12]
- 8000cb4:	f113 0f64 	cmn.w	r3, #100	@ 0x64
- 8000cb8:	da02      	bge.n	8000cc0 <main+0x15c>
- 8000cba:	f06f 0363 	mvn.w	r3, #99	@ 0x63
- 8000cbe:	60fb      	str	r3, [r7, #12]
+ 8000cb4:	68fb      	ldr	r3, [r7, #12]
+ 8000cb6:	f113 0f64 	cmn.w	r3, #100	@ 0x64
+ 8000cba:	da02      	bge.n	8000cc2 <main+0x15e>
+ 8000cbc:	f06f 0363 	mvn.w	r3, #99	@ 0x63
+ 8000cc0:	60fb      	str	r3, [r7, #12]
 
 		  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
- 8000cc0:	68fb      	ldr	r3, [r7, #12]
- 8000cc2:	ee07 3a90 	vmov	s15, r3
- 8000cc6:	eef8 7ae7 	vcvt.f32.s32	s15, s15
- 8000cca:	ed9f 7a1b 	vldr	s14, [pc, #108]	@ 8000d38 <main+0x1d4>
- 8000cce:	ee77 7a87 	vadd.f32	s15, s15, s14
- 8000cd2:	eefc 7ae7 	vcvt.u32.f32	s15, s15
- 8000cd6:	ee17 3a90 	vmov	r3, s15
- 8000cda:	b29b      	uxth	r3, r3
- 8000cdc:	b21a      	sxth	r2, r3
- 8000cde:	4b10      	ldr	r3, [pc, #64]	@ (8000d20 <main+0x1bc>)
- 8000ce0:	801a      	strh	r2, [r3, #0]
+ 8000cc2:	68fb      	ldr	r3, [r7, #12]
+ 8000cc4:	ee07 3a90 	vmov	s15, r3
+ 8000cc8:	eef8 7ae7 	vcvt.f32.s32	s15, s15
+ 8000ccc:	ed9f 7a1a 	vldr	s14, [pc, #104]	@ 8000d38 <main+0x1d4>
+ 8000cd0:	ee77 7a87 	vadd.f32	s15, s15, s14
+ 8000cd4:	eefc 7ae7 	vcvt.u32.f32	s15, s15
+ 8000cd8:	ee17 3a90 	vmov	r3, s15
+ 8000cdc:	b29b      	uxth	r3, r3
+ 8000cde:	b21a      	sxth	r2, r3
+ 8000ce0:	4b0f      	ldr	r3, [pc, #60]	@ (8000d20 <main+0x1bc>)
+ 8000ce2:	801a      	strh	r2, [r3, #0]
 		  g_target_current = DRIVE_ENCODE_CURRENT(50.0f);
- 8000ce2:	4b10      	ldr	r3, [pc, #64]	@ (8000d24 <main+0x1c0>)
- 8000ce4:	f647 62f4 	movw	r2, #32500	@ 0x7ef4
- 8000ce8:	801a      	strh	r2, [r3, #0]
+ 8000ce4:	4b0f      	ldr	r3, [pc, #60]	@ (8000d24 <main+0x1c0>)
+ 8000ce6:	f647 62f4 	movw	r2, #32500	@ 0x7ef4
+ 8000cea:	801a      	strh	r2, [r3, #0]
 		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
- 8000cea:	4b0f      	ldr	r3, [pc, #60]	@ (8000d28 <main+0x1c4>)
- 8000cec:	2203      	movs	r2, #3
- 8000cee:	701a      	strb	r2, [r3, #0]
+ 8000cec:	4b0e      	ldr	r3, [pc, #56]	@ (8000d28 <main+0x1c4>)
+ 8000cee:	2203      	movs	r2, #3
+ 8000cf0:	701a      	strb	r2, [r3, #0]
 	  }
 
 	  Drive_Tick(g_target_current, g_target_speed, g_command);
- 8000cf0:	4b0c      	ldr	r3, [pc, #48]	@ (8000d24 <main+0x1c0>)
- 8000cf2:	f9b3 3000 	ldrsh.w	r3, [r3]
- 8000cf6:	4a0a      	ldr	r2, [pc, #40]	@ (8000d20 <main+0x1bc>)
- 8000cf8:	f9b2 1000 	ldrsh.w	r1, [r2]
- 8000cfc:	4a0a      	ldr	r2, [pc, #40]	@ (8000d28 <main+0x1c4>)
- 8000cfe:	7812      	ldrb	r2, [r2, #0]
- 8000d00:	4618      	mov	r0, r3
- 8000d02:	f7ff fe33 	bl	800096c <Drive_Tick>
+ 8000cf2:	4b0c      	ldr	r3, [pc, #48]	@ (8000d24 <main+0x1c0>)
+ 8000cf4:	f9b3 3000 	ldrsh.w	r3, [r3]
+ 8000cf8:	4a09      	ldr	r2, [pc, #36]	@ (8000d20 <main+0x1bc>)
+ 8000cfa:	f9b2 1000 	ldrsh.w	r1, [r2]
+ 8000cfe:	4a0a      	ldr	r2, [pc, #40]	@ (8000d28 <main+0x1c4>)
+ 8000d00:	7812      	ldrb	r2, [r2, #0]
+ 8000d02:	4618      	mov	r0, r3
+ 8000d04:	f7ff fe32 	bl	800096c <Drive_Tick>
 
 	  HAL_Delay(10);
- 8000d06:	200a      	movs	r0, #10
- 8000d08:	f000 fe2a 	bl	8001960 <HAL_Delay>
+ 8000d08:	200a      	movs	r0, #10
+ 8000d0a:	f000 fe29 	bl	8001960 <HAL_Delay>
   while (1) {
- 8000d0c:	e74f      	b.n	8000bae <main+0x4a>
- 8000d0e:	bf00      	nop
+ 8000d0e:	e74e      	b.n	8000bae <main+0x4a>
  8000d10:	20000068 	.word	0x20000068
  8000d14:	200000cc 	.word	0x200000cc
  8000d18:	200001ac 	.word	0x200001ac

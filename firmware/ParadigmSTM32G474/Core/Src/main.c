@@ -129,25 +129,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-	  /*
-	  // Halt on fault or comms failure
-	  if (Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
-		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
-		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-		  g_command        = CMD_HALTED;
-		  HAL_Delay(10);
-		  continue;
-	  }
-
-	  // Command 100rpm once the handshake is complete
-	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
-		  g_target_speed   = DRIVE_ENCODE_SPEED(100.0f);
-		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
-	  }
-
-	  HAL_Delay(10);
-	  */
 
 	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
 	  bool estopped  = !signal_ok || (g_estop_us > 1500);
@@ -163,7 +144,7 @@ int main(void)
 	  }
 
 	  // ---- Normal operation ----
-	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
+	  else if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
