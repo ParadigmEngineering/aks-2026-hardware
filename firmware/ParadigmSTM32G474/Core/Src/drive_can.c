@@ -102,6 +102,7 @@ bool Drive_Init(FDCAN_HandleTypeDef *hfdcan, uint8_t mcu_address) {
 
 	if (HAL_FDCAN_ActivateNotification(hfdcan,
 			FDCAN_IT_RX_FIFO0_NEW_MESSAGE |
+			FDCAN_IT_RX_FIFO1_NEW_MESSAGE |
 			FDCAN_IT_BUS_OFF |
 			FDCAN_IT_ERROR_PASSIVE |
 			FDCAN_IT_ERROR_WARNING,
@@ -120,18 +121,21 @@ static void ConfigureFDCANFilter() {
 	}
 
 	FDCAN_FilterTypeDef filter_config;
-
 	filter_config.IdType = FDCAN_EXTENDED_ID;
-	filter_config.FilterIndex = 0;
 	filter_config.FilterType = FDCAN_FILTER_MASK;
+	// Filter 0: MCU Status1 -> FIFO0
+	filter_config.FilterIndex = 0;
 	filter_config.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-	filter_config.FilterID1 = 0x00000000;
-	filter_config.FilterID2 = 0x00000000;
+	filter_config.FilterID1 = CAN_ID_MCU_STATUS1;
+	filter_config.FilterID2 = 0x1FFFFFFF;
 
 	HAL_FDCAN_ConfigFilter(drive.hfdcan, &filter_config);
 
+	// Filter 1: MCU Status2 -> FIFO1
 	filter_config.FilterIndex = 1;
     filter_config.FilterConfig = FDCAN_FILTER_TO_RXFIFO1;
+    filter_config.FilterID1 = CAN_ID_MCU_STATUS2;
+    filter_config.FilterID2 = 0x1FFFFFFF;
     HAL_FDCAN_ConfigFilter(drive.hfdcan, &filter_config);
 
     // Configure global filter to reject non-matching frames
@@ -196,6 +200,7 @@ void Drive_Tick(int16_t target_current, int16_t target_speed, DriveCommand_t com
 		return;
 	}
 
+	drive.last_tx_tick = now;
 	switch(drive.state) {
 		case DRIVE_STATE_HANDSHAKING:
 			Drive_SendHandshake();
@@ -228,7 +233,7 @@ void Drive_ProcessRx(const FDCAN_RxHeaderTypeDef *hdr, const uint8_t *data) {
 	uint32_t id = hdr->Identifier;
 
 	// Handshake: MCU sends 8x0x55 on the Status1 ID
-	if (id == CAN_ID_MCU_STATUS1 && drive.state == DRIVE_STATE_HANDSHAKING) {
+	/*if (id == CAN_ID_MCU_STATUS1 && drive.state == DRIVE_STATE_HANDSHAKING) {
 		bool all_match = true;
 
 		for (uint8_t i = 0; i < 8; i++) {
@@ -242,7 +247,24 @@ void Drive_ProcessRx(const FDCAN_RxHeaderTypeDef *hdr, const uint8_t *data) {
 			drive.missed_rx_count = 0;
 		}
 		return;
+	}*/
+
+	if (id == CAN_ID_MCU_STATUS1 && drive.state == DRIVE_STATE_HANDSHAKING) {
+	    // If we get the 0x55 beacon, we already sent 0xAA — handshake done
+	    // If we get real telemetry, MCU already accepted our 0xAA — also done
+	    drive.state = DRIVE_STATE_OPERATIONAL;
+	    drive.missed_rx_count = 0;
+	    // Also parse if it's real telemetry, not the 0x55 beacon
+	    bool is_beacon = true;
+	    for (uint8_t i = 0; i < 8; i++) {
+	        if (data[i] != MCU_HANDSHAKE_BYTE) { is_beacon = false; break; }
+	    }
+	    if (!is_beacon) {
+	        ParseStatus1(data);
+	    }
+	    return;
 	}
+
 
 	// Operational telemetry
 	if (drive.state == DRIVE_STATE_OPERATIONAL) {

@@ -124,7 +124,6 @@ int main(void)
 
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1); // throttle
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2); // e-stop
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,23 +151,21 @@ int main(void)
 
 	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
 	  bool estopped  = !signal_ok || (g_estop_us > 1500);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
 
 	  //  E-stop or signal lost
-	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError())
-	  {
+	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
-		  g_command        = CMD_HALTED;
+		  g_command = CMD_HALTED;
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
 		  HAL_Delay(10);
-		  continue;
 	  }
 
 	  // ---- Normal operation ----
-	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL)
-	  {
+	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
 		  int32_t deviation = (int32_t)g_throttle_us - 1500;
 		  int32_t target    = 0;
@@ -182,9 +179,11 @@ int main(void)
 		  if (target < -MAX_RPM) { target = -MAX_RPM; }
 
 		  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
-		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_target_current = DRIVE_ENCODE_CURRENT(50.0f);
 		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
 	  }
+
+	  Drive_Tick(g_target_current, g_target_speed, g_command);
 
 	  HAL_Delay(10);
 
@@ -255,7 +254,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.ClockDivider = FDCAN_CLOCK_DIV1;
   hfdcan2.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan2.Init.AutoRetransmission = ENABLE;
+  hfdcan2.Init.AutoRetransmission = DISABLE;
   hfdcan2.Init.TransmitPause = DISABLE;
   hfdcan2.Init.ProtocolException = DISABLE;
   hfdcan2.Init.NominalPrescaler = 4;
@@ -267,7 +266,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 1;
+  hfdcan2.Init.ExtFiltersNbr = 2;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
@@ -442,6 +441,20 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+    FDCAN_RxHeaderTypeDef hdr;
+    uint8_t data[8];
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &hdr, data);
+    Drive_ProcessRx(&hdr, data);
+}
+
+void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs) {
+    FDCAN_RxHeaderTypeDef hdr;
+    uint8_t data[8];
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &hdr, data);
+    Drive_ProcessRx(&hdr, data);
+}
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
