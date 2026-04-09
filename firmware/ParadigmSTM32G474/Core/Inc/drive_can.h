@@ -140,8 +140,8 @@ void Drive_ProcessRx(const FDCAN_RxHeaderTypeDef *hdr, const uint8_t *data);
 bool Drive_HasError();
 DriveState_t Drive_GetState();
 
-#define DRIVE_ENCODE_CURRENT(amps) 	((uint16_t)(((amps) / 0.1) + CURRENT_OFFSET_RAW))
-#define DRIVE_ENCODE_SPEED(rpm) 	((uint16_t)((rpm) + SPEED_OFFSET_RAW))
+#define DRIVE_ENCODE_CURRENT(amps) 	((int16_t)(((amps) / 0.1) + CURRENT_OFFSET_RAW))
+#define DRIVE_ENCODE_SPEED(rpm) 	((int16_t)((rpm) + SPEED_OFFSET_RAW))
 
 
 #ifdef __cplusplus

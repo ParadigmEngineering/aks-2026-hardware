@@ -159,8 +159,15 @@ int main(void)
 		  if (target >  MAX_RPM) { target =  MAX_RPM; }
 		  if (target < -MAX_RPM) { target = -MAX_RPM; }
 
-		  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
-		  g_target_current = DRIVE_ENCODE_CURRENT(50.0f);
+
+		  if (target >= 0) {
+			  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
+			  g_target_current = DRIVE_ENCODE_CURRENT(50.0f);
+		  } else {
+			  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
+			  g_target_current = DRIVE_ENCODE_CURRENT(-50.0f);
+		  }
+
 		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
 	  }
 
