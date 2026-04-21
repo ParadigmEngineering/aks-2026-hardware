@@ -1,0 +1,11 @@
+../Drivers/CMSIS/Include/core_cm4.h:1679:22:__NVIC_EnableIRQ	16	static,ignoring_inline_asm
+../Drivers/CustomDrivers/Src/uart_test.c:19:13:uart_rx_push	24	static
+../Drivers/CustomDrivers/Src/uart_test.c:32:6:initClocks	4	static
+../Drivers/CustomDrivers/Src/uart_test.c:40:6:configPinMode	4	static
+../Drivers/CustomDrivers/Src/uart_test.c:49:6:setAF	4	static
+../Drivers/CustomDrivers/Src/uart_test.c:60:6:configureUart1Pins	8	static
+../Drivers/CustomDrivers/Src/uart_test.c:70:6:configureUart1	8	static
+../Drivers/CustomDrivers/Src/uart_test.c:120:6:USART1_IRQHandler	16	static
+../Drivers/CustomDrivers/Src/uart_test.c:137:9:receiveUart	16	static
+../Drivers/CustomDrivers/Src/uart_test.c:154:6:transmitUart	16	static
+../Drivers/CustomDrivers/Src/uart_test.c:165:6:initUART	8	static
