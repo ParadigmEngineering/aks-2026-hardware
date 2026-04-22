@@ -55,7 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern FDCAN_HandleTypeDef hfdcan2;
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim1;
 /* USER CODE END EV */
@@ -199,31 +199,17 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles FDCAN2 interrupt 0.
+  * @brief This function handles TIM2 global interrupt.
   */
-void FDCAN2_IT0_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
-  /* USER CODE BEGIN FDCAN2_IT0_IRQn 0 */
+  /* USER CODE BEGIN TIM2_IRQn 0 */
 
-  /* USER CODE END FDCAN2_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan2);
-  /* USER CODE BEGIN FDCAN2_IT0_IRQn 1 */
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
 
-  /* USER CODE END FDCAN2_IT0_IRQn 1 */
-}
-
-/**
-  * @brief This function handles FDCAN2 interrupt 1.
-  */
-void FDCAN2_IT1_IRQHandler(void)
-{
-  /* USER CODE BEGIN FDCAN2_IT1_IRQn 0 */
-
-  /* USER CODE END FDCAN2_IT1_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan2);
-  /* USER CODE BEGIN FDCAN2_IT1_IRQn 1 */
-
-  /* USER CODE END FDCAN2_IT1_IRQn 1 */
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
