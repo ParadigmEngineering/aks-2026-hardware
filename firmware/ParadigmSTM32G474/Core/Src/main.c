@@ -46,7 +46,9 @@ FDCAN_HandleTypeDef hfdcan2;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim15;
 
 UART_HandleTypeDef huart1;
 
@@ -57,10 +59,10 @@ static volatile uint32_t g_estop_us       = 1200;  /* default = inactive */
 static volatile uint32_t g_last_pulse_ms  = 0;     /* for signal-lost detection */
 
 /* Rise-edge timestamps and fall-edge flags for each channel */
-static volatile uint32_t g_ch1_rise = 0;
-static volatile uint32_t g_ch2_rise = 0;
-static volatile uint8_t  g_ch1_fall = 0;
-static volatile uint8_t  g_ch2_fall = 0;
+static volatile uint32_t g_ch3_rise = 0;
+static volatile uint32_t g_ch4_rise = 0;
+static volatile uint8_t  g_ch3_fall = 0;
+static volatile uint8_t  g_ch4_fall = 0;
 
 static int16_t g_target_current = 0;
 static int16_t g_target_speed = 0;
@@ -69,6 +71,10 @@ static DriveCommand_t g_command = CMD_HALTED;
 static volatile uint32_t test_pwm = 0;
 
 extern DriveController_t drive;
+
+static volatile uint32_t loop_count = 0;
+
+static volatile uint32_t tim15_irq_count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,6 +85,8 @@ static void MX_FDCAN2_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_TIM15_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -124,17 +132,19 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
+  MX_TIM3_Init();
+  MX_TIM15_Init();
   /* USER CODE BEGIN 2 */
   initUART();
 
   if (!Drive_Init(&hfdcan2, MCU_ADDRESS_DEFAULT)) {
-	  Error_Handler();
+	 Error_Handler();
   }
 
-  HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1); // throttle
-  HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_2); // e-stop
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // throttle
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4); // e-stop
 
-  Steering_Init(&htim2, &htim1);
+  Steering_Init(&htim1, &htim15);
 
   /* USER CODE END 2 */
 
@@ -142,24 +152,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 
-	  //bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
-	  //bool estopped  = !signal_ok || (g_estop_us > 1500);
+	  loop_count++;
 
-	  bool estopped = false;
-	  (void)g_estop_us; /* suppress unused-variable warning if signal_ok check is disabled */
+	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
+	  bool estopped  = !signal_ok || (g_estop_us > 1500);
+
+	  //bool estopped = false;
+	  //(void)g_estop_us; /* suppress unused-variable warning if signal_ok check is disabled */
 
 	  //  E-stop or signal lost
 	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command = CMD_HALTED;
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
 		  HAL_Delay(10);
 	  }
 
 	  // ---- Normal operation ----
 	  else if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
 		  int32_t deviation = (int32_t)g_throttle_us - 1500;
@@ -298,7 +308,8 @@ static void MX_TIM1_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_IC_InitTypeDef sConfigIC = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
   /* USER CODE BEGIN TIM1_Init 1 */
 
@@ -306,7 +317,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 15;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -319,7 +330,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_IC_Init(&htim1) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -330,11 +341,31 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
-  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim1, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.BreakAFMode = TIM_BREAK_AFMODE_INPUT;
+  sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+  sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+  sBreakDeadTimeConfig.Break2Filter = 0;
+  sBreakDeadTimeConfig.Break2AFMode = TIM_BREAK_AFMODE_INPUT;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -342,6 +373,7 @@ static void MX_TIM1_Init(void)
   HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
   /* USER CODE END TIM1_Init 2 */
+  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -359,7 +391,7 @@ static void MX_TIM2_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
@@ -379,7 +411,7 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -389,18 +421,80 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
-  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 0;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 65535;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+  HAL_NVIC_SetPriority(TIM3_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM3_IRQn);
+  /* USER CODE END TIM3_Init 2 */
 
 }
 
@@ -461,8 +555,59 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM4_Init 2 */
-
+  HAL_NVIC_SetPriority(TIM4_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM4_IRQn);
   /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
+  * @brief TIM15 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM15_Init(void)
+{
+
+  /* USER CODE BEGIN TIM15_Init 0 */
+
+  /* USER CODE END TIM15_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM15_Init 1 */
+
+  /* USER CODE END TIM15_Init 1 */
+  htim15.Instance = TIM15;
+  htim15.Init.Prescaler = 0;
+  htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim15.Init.Period = 65535;
+  htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim15.Init.RepetitionCounter = 0;
+  htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_IC_Init(&htim15) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim15, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim15, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM15_Init 2 */
+  HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+  /* USER CODE END TIM15_Init 2 */
 
 }
 
@@ -528,15 +673,22 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1|GPIO_PIN_6, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
+  /*Configure GPIO pins : PC1 PC6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -545,36 +697,32 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
-  /* PA8: TIM1 CH1 steering input */
-   GPIO_InitStruct.Pin       = GPIO_PIN_8;
+  /* PB14: TIM15 CH1 steering input */
+   GPIO_InitStruct.Pin       = GPIO_PIN_14;
    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
-   GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
-   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+   GPIO_InitStruct.Alternate = GPIO_AF3_TIM15;
+   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-   /* PA9: TIM2 CH3 steering PWM output */
-   GPIO_InitStruct.Pin       = GPIO_PIN_9;
-   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+   /* PC0: TIM1 CH1 steering PWM output */
+   GPIO_InitStruct.Pin       = GPIO_PIN_0;
+   GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+   GPIO_InitStruct.Pull      = GPIO_NOPULL;
+   GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+   GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
+   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-   /* PA11: TIM4 CH1 throttle   PA12: TIM4 CH2 e-stop */
+   /* PC8: TIM3 CH3 throttle   PC9: TIM3 CH4 e-stop */
    /* FIX: STM32G474 uses GPIO_AF2_TIM4, not GPIO_AF6_TIM4 */
-   GPIO_InitStruct.Pin       = GPIO_PIN_11 | GPIO_PIN_12;
+   GPIO_InitStruct.Pin       = GPIO_PIN_8 | GPIO_PIN_9;
    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
    GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
-   GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
+   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -597,72 +745,75 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
-    /* ── TIM4: Throttle (CH2) and E-stop (CH1) ──────────────────────────── */
-    if (htim->Instance == TIM4)
+    /* ── TIM3: Throttle (CH3) and E-stop (CH4) ──────────────────────────── */
+    if (htim->Instance == TIM3)
     {
         uint32_t now = HAL_GetTick();
 
-        /* --- E-stop: Channel 1 --- */
-        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+        /* --- E-stop: Channel 4 --- */
+        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
         {
-            if (g_ch1_fall == 0)
+            if (g_ch4_fall == 0)
             {
                 /* Rising edge — record start */
-                g_ch1_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
+                g_ch4_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
+                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4,
                                               TIM_INPUTCHANNELPOLARITY_FALLING);
-                g_ch1_fall = 1;
+                g_ch4_fall = 1;
             }
             else
             {
                 /* Falling edge — measure width */
-                uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-                uint32_t width = (end >= g_ch1_rise)
-                                 ? (end - g_ch1_rise)
-                                 : (65535 - g_ch1_rise + end + 1); /* overflow safe */
+                uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
+                uint32_t width = (end >= g_ch4_rise)
+                                 ? (end - g_ch4_rise)
+                                 : (65535 - g_ch4_rise + end + 1); /* overflow safe */
 
                 /* TIM4 prescaler=0, 16MHz clock → 1 tick = 62.5ns
                    Convert ticks to microseconds: divide by 16 */
                 g_estop_us      = width / 16;
                 g_last_pulse_ms = now;
 
-                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
+                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4,
                                               TIM_INPUTCHANNELPOLARITY_RISING);
-                g_ch1_fall = 0;
+                g_ch4_fall = 0;
             }
         }
 
-        /* --- Throttle: Channel 2 --- */
-        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+        /* --- Throttle: Channel 3 --- */
+        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
         {
-            if (g_ch2_fall == 0)
+            if (g_ch3_fall == 0)
             {
-                g_ch2_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,
+                g_ch3_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
                                               TIM_INPUTCHANNELPOLARITY_FALLING);
-                g_ch2_fall = 1;
+                g_ch3_fall = 1;
             }
             else
             {
-                uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-                uint32_t width = (end >= g_ch2_rise)
-                                 ? (end - g_ch2_rise)
-                                 : (65535 - g_ch2_rise + end + 1);
+                uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+                uint32_t width = (end >= g_ch3_rise)
+                                 ? (end - g_ch3_rise)
+                                 : (65535 - g_ch3_rise + end + 1);
 
                 g_throttle_us = width / 16;
+                g_last_pulse_ms = now;
 
-                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2,
+                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
                                               TIM_INPUTCHANNELPOLARITY_RISING);
-                g_ch2_fall = 0;
+                g_ch3_fall = 0;
             }
         }
     } /* end if (htim->Instance == TIM4) */   /* <-- FIX: this closing brace was missing */
 
-    /* ── TIM1: Steering input ───────────────────────────────────────────── */
-    if (htim->Instance == TIM1)
+    /* ── TIM15: Steering input ───────────────────────────────────────────── */
+    if (htim->Instance == TIM15)
     {
+
+    	tim15_irq_count++;
+
         if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
         {
             SteeringController_t *s = Steering_GetHandle();
@@ -678,9 +829,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
             {
                 /* Falling edge */
                 uint32_t end = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-                s->input_width_us = (end >= s->input_start)
+                uint32_t width = (end >= s->input_start)
                                     ? (end - s->input_start)
                                     : (65535 - s->input_start + end + 1);
+                s->input_width_us = width / 16;
                 __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
                                               TIM_INPUTCHANNELPOLARITY_RISING);
                 s->input_edge = 0;

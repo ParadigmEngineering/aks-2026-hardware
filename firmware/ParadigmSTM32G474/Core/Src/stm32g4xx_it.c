@@ -41,7 +41,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+volatile uint32_t tim3_irq_count = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +58,9 @@
 extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim15;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -215,8 +218,23 @@ void TIM2_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 void TIM1_CC_IRQHandler(void)
 {
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
     HAL_TIM_IRQHandler(&htim1);
 
+}
+
+void TIM3_IRQHandler(void)
+{
+	tim3_irq_count++;
+    HAL_TIM_IRQHandler(&htim3);
+}
+
+void TIM4_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim4);
+}
+
+void TIM1_BRK_TIM15_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim15);
 }
 /* USER CODE END 1 */

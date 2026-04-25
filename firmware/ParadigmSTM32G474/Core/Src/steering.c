@@ -9,11 +9,11 @@ void Steering_Init(TIM_HandleTypeDef *htim_output, TIM_HandleTypeDef *htim_input
 	    steering.htim_input      = htim_input;
 
 	    steering.input_start     = 0;
-	    steering.input_width_us  = 0;
+	    steering.input_width_us  = STEERING_PWM_CENTER_US;
 	    steering.input_edge      = 0;
 
 	    //Start PWM output to ClearPath motor
-	    HAL_TIM_PWM_Start(htim_output, TIM_CHANNEL_3); // TIM2, CH3
+	    HAL_TIM_PWM_Start(htim_output, TIM_CHANNEL_1); // TIM1, CH2
 
 	    // Start input capture interrupts for steering channel
 	    HAL_TIM_IC_Start_IT(htim_input, TIM_CHANNEL_1);
@@ -21,6 +21,7 @@ void Steering_Init(TIM_HandleTypeDef *htim_output, TIM_HandleTypeDef *htim_input
 
 void Steering_Tick(void) {
     uint32_t pulse_us = steering.input_width_us;
+	uint32_t arr = __HAL_TIM_GET_AUTORELOAD(steering.htim_output);
     uint32_t duty;
 
 	// Deadband - if within 20 us of center, treat exactly as center (fixes idle jitter)
@@ -34,9 +35,10 @@ void Steering_Tick(void) {
     if (pulse_us > STEERING_PWM_MAX_US) pulse_us = STEERING_PWM_MAX_US;
 
 
-    duty = ((pulse_us - STEERING_PWM_MIN_US) * (STEERING_DUTY_MAX - STEERING_DUTY_MIN)) / (STEERING_PWM_MAX_US - STEERING_PWM_MIN_US) + STEERING_DUTY_MIN;
+    duty = ((pulse_us - STEERING_PWM_MIN_US) * arr) / (STEERING_PWM_MAX_US - STEERING_PWM_MIN_US);
 
-    __HAL_TIM_SET_COMPARE(steering.htim_output, TIM_CHANNEL_3, duty);
+    __HAL_TIM_SET_COMPARE(steering.htim_output, TIM_CHANNEL_1, duty);
+
 }
 
 // Get/return pulse width

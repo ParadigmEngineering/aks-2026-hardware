@@ -1,4 +1,4 @@
 ../Core/Src/steering.c:6:6:Steering_Init	16	static
-../Core/Src/steering.c:22:6:Steering_Tick	16	static
-../Core/Src/steering.c:43:10:Steering_GetPulseWidth	4	static
-../Core/Src/steering.c:48:23:Steering_GetHandle	4	static
+../Core/Src/steering.c:22:6:Steering_Tick	24	static
+../Core/Src/steering.c:45:10:Steering_GetPulseWidth	4	static
+../Core/Src/steering.c:50:23:Steering_GetHandle	4	static
