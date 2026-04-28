@@ -1,0 +1,12 @@
+/******************************************************************************
+ * File: braking.h
+ * Project: Paradigm Braking Actuator Control
+ * Author: Paradigm Student Design Team
+ * Date: 2026
+ ******************************************************************************/
+
+/*
+ * Servo_WriteMicroseconds()
+ * Sends a pulse width directly to the servo. Clamps to safe limits.
+ */
+void Servo_WriteMicroseconds(uint16_t us);

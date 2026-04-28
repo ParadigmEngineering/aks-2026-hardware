@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;ParadigmSTM32G474/Core/Inc/braking&apos; to &apos;braking.h&apos;" description="Rename resource &apos;braking&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Inc/braking" name="braking.h" stamp="1777413160552" updateReferences="true"/>
+</session>

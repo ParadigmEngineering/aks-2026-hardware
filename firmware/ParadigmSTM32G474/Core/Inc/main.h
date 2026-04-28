@@ -61,6 +61,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Steering_Output_B_Pin GPIO_PIN_0
 #define Steering_Output_B_GPIO_Port GPIOC
+#define Braking_OUT_Pin GPIO_PIN_7
+#define Braking_OUT_GPIO_Port GPIOC
 #define Steering_Output_Pin GPIO_PIN_9
 #define Steering_Output_GPIO_Port GPIOA
 
