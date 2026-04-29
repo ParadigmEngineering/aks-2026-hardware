@@ -1,4 +1,5 @@
 "./Core/Src/drive_can.o"
+"./Core/Src/jetson_uart.o"
 "./Core/Src/main.o"
 "./Core/Src/steering.o"
 "./Core/Src/stm32g4xx_hal_msp.o"

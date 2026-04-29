@@ -24,6 +24,7 @@
 #include "uart_test.h"
 #include "drive_can.h"
 #include "steering.h"
+#include "jetson_uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,13 +45,13 @@
 /* Private variables ---------------------------------------------------------*/
 FDCAN_HandleTypeDef hfdcan2;
 
+UART_HandleTypeDef hlpuart1;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim15;
-
-UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Latest measured pulse widths — updated in input capture callback */
@@ -75,20 +76,24 @@ extern DriveController_t drive;
 static volatile uint32_t loop_count = 0;
 
 static volatile uint32_t tim15_irq_count = 0;
+
+static uint8_t jetson_rx_byte = 0;
+static volatile uint16_t g_autonomous_throttle_us = 1500;
+static volatile uint16_t g_autonomous_steering_us = 1500;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_FDCAN2_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM15_Init(void);
+static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+static bool UpdateJetsonCommands(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -106,7 +111,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	SCB->VTOR = 0x08000000; // Remaps vector table to flash so STM doesn't get stuck in loop
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -127,15 +132,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART1_UART_Init();
   MX_FDCAN2_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
   MX_TIM3_Init();
   MX_TIM15_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  initUART();
+  //initUART();
 
   if (!Drive_Init(&hfdcan2, MCU_ADDRESS_DEFAULT)) {
 	 Error_Handler();
@@ -145,6 +150,9 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4); // e-stop
 
   Steering_Init(&htim1, &htim15);
+
+  Jetson_Init();
+  HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
 
   /* USER CODE END 2 */
 
@@ -160,12 +168,29 @@ int main(void)
 	  //bool estopped = false;
 	  //(void)g_estop_us; /* suppress unused-variable warning if signal_ok check is disabled */
 
+	  bool autonomous_mode = true;
+
+	  bool jetson_ok = UpdateJetsonCommands();
+
+	  uint16_t active_throttle_us = 1500;
+	  uint16_t active_steering_us  = 1500;
+
+	  if (autonomous_mode && jetson_ok)
+	  {
+	      active_throttle_us = g_autonomous_throttle_us;
+	      active_steering_us = g_autonomous_steering_us;
+	  }
+	  else
+	  {
+	      active_throttle_us = g_throttle_us;
+	  }
+
 	  //  E-stop or signal lost
 	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command = CMD_HALTED;
-		  HAL_Delay(10);
+		  //HAL_Delay(10);
 	  }
 
 	  // ---- Normal operation ----
@@ -201,7 +226,7 @@ int main(void)
 	  Steering_Tick();
 	  test_pwm = Steering_GetPulseWidth();
 
-	  HAL_Delay(10);
+	  //HAL_Delay(10);
 
   }
     /* USER CODE END WHILE */
@@ -295,6 +320,53 @@ static void MX_FDCAN2_Init(void)
 }
 
 /**
+  * @brief LPUART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPUART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
+  hlpuart1.Instance = LPUART1;
+  hlpuart1.Init.BaudRate = 115200;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
+  hlpuart1.Init.StopBits = UART_STOPBITS_1;
+  hlpuart1.Init.Parity = UART_PARITY_NONE;
+  hlpuart1.Init.Mode = UART_MODE_TX_RX;
+  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPUART1_Init 2 */
+
+  /* USER CODE END LPUART1_Init 2 */
+
+}
+
+/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -317,7 +389,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 15;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 999;
+  htim1.Init.Period = 65535;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -612,54 +684,6 @@ static void MX_TIM15_Init(void)
 }
 
 /**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART1_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&huart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -869,6 +893,56 @@ void HAL_FDCAN_ErrorStatusCallback(FDCAN_HandleTypeDef *hfdcan, uint32_t ErrorSt
         HAL_FDCAN_Stop(hfdcan);
         Drive_Init(hfdcan, MCU_ADDRESS_DEFAULT);
     }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart->Instance == LPUART1) {
+		uint8_t b = jetson_rx_byte;
+
+		Jetson_ProcessByte(b);
+
+		HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
+	}
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == LPUART1)
+    {
+        /*
+         * Recover from noise, framing, or overrun errors.
+         */
+        HAL_UART_AbortReceive_IT(&hlpuart1);
+
+        /*
+         * Restart reception.
+         */
+        HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
+    }
+}
+
+static bool UpdateJetsonCommands()
+{
+    JetsonCommand_t cmd;
+
+    if (!Jetson_CommandAllowAutonomous())
+    {
+        g_autonomous_throttle_us = 1500;
+        g_autonomous_steering_us = 1500;
+        return false;
+    }
+
+    if (!Jetson_GetLatestCommand(&cmd))
+    {
+        g_autonomous_throttle_us = 1500;
+        g_autonomous_steering_us = 1500;
+        return false;
+    }
+
+    g_autonomous_throttle_us = cmd.throttle;
+    g_autonomous_steering_us = cmd.steering;
+
+    return true;
 }
 /* USER CODE END 4 */
 

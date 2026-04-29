@@ -31,7 +31,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_uart_ex.h \
  ../Drivers/CustomDrivers/Inc/uart_test.h \
  ../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g474xx.h \
- ../Core/Inc/drive_can.h ../Core/Inc/steering.h
+ ../Core/Inc/drive_can.h ../Core/Inc/steering.h ../Core/Inc/jetson_uart.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -67,3 +67,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/CMSIS/Device/ST/STM32G4xx/Include/stm32g474xx.h:
 ../Core/Inc/drive_can.h:
 ../Core/Inc/steering.h:
+../Core/Inc/jetson_uart.h:
