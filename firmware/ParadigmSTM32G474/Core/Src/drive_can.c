@@ -153,7 +153,7 @@ bool Drive_SendHandshake() {
 	return SendFDCANFrame(CAN_ID_VCU_TO_MCU, data, 8);
 }
 
-bool Drive_SendCommand(int16_t target_current, int16_t target_speed, DriveCommand_t command){
+bool Drive_SendCommand(int16_t target_current, int16_t target_speed, DriveCommand_t command) {
 	uint8_t buf[8] = {0};
 
 	// Bytes 0-1: target phase current, little-endian

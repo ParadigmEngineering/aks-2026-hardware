@@ -32,6 +32,8 @@ extern "C" {
 #define CURRENT_OFFSET_RAW 	32000
 #define SPEED_OFFSET_RAW 	32000
 
+extern volatile uint32_t rx_frame_count;
+
 typedef enum {
 	CMD_HALTED 			= 0x00,
 	CMD_RUNNING 		= 0x01,

@@ -1,3 +1,4 @@
+"./Core/Src/braking.o"
 "./Core/Src/drive_can.o"
 "./Core/Src/jetson_uart.o"
 "./Core/Src/main.o"

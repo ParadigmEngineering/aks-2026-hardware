@@ -39,7 +39,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define MAX_RPM 100
+#define MAX_RPM 300
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -51,6 +51,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim15;
 
 /* USER CODE BEGIN PV */
@@ -80,6 +81,8 @@ static volatile uint32_t tim15_irq_count = 0;
 static uint8_t jetson_rx_byte = 0;
 static volatile uint16_t g_autonomous_throttle_us = 1500;
 static volatile uint16_t g_autonomous_steering_us = 1500;
+
+extern volatile uint32_t rx_frame_count;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +95,7 @@ static void MX_TIM4_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_LPUART1_UART_Init(void);
+static void MX_TIM8_Init(void);
 /* USER CODE BEGIN PFP */
 static bool UpdateJetsonCommands(void);
 /* USER CODE END PFP */
@@ -139,6 +143,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM15_Init();
   MX_LPUART1_UART_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   //initUART();
 
@@ -151,14 +156,20 @@ int main(void)
 
   Steering_Init(&htim1, &htim15);
 
-  Jetson_Init();
-  HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
+  //Jetson_Init();
+  //HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+
+	  if (hfdcan2.Instance->PSR & 0x80) {  // check bus-off bit
+		  HAL_FDCAN_Stop(&hfdcan2);
+		  HAL_Delay(200);
+		  Drive_Init(&hfdcan2, MCU_ADDRESS_DEFAULT);
+	  }
 
 	  loop_count++;
 
@@ -168,7 +179,7 @@ int main(void)
 	  //bool estopped = false;
 	  //(void)g_estop_us; /* suppress unused-variable warning if signal_ok check is disabled */
 
-	  bool autonomous_mode = true;
+	  /*bool autonomous_mode = true;
 
 	  bool jetson_ok = UpdateJetsonCommands();
 
@@ -183,14 +194,13 @@ int main(void)
 	  else
 	  {
 	      active_throttle_us = g_throttle_us;
-	  }
+	  }*/
 
 	  //  E-stop or signal lost
 	  if (estopped || Drive_GetState() == DRIVE_STATE_COMM_FAILED || Drive_HasError()) {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command = CMD_HALTED;
-		  //HAL_Delay(10);
 	  }
 
 	  // ---- Normal operation ----
@@ -198,12 +208,12 @@ int main(void)
 
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
 		  int32_t deviation = (int32_t)g_throttle_us - 1500;
-		  int32_t target    = 0;
+		  int32_t target = 0;
 
-		  if (deviation > 50)
-			  target = ((deviation - 50) * MAX_RPM) / 450;
-		  else if (deviation < -50)
-			  target = ((deviation + 50) * MAX_RPM) / 450;
+		  if (deviation > 100)
+			  target = ((deviation - 100) * MAX_RPM) / 400;
+		  else if (deviation < -100)
+			  target = ((deviation + 100) * MAX_RPM) / 400;
 
 		  if (target >  MAX_RPM) { target =  MAX_RPM; }
 		  if (target < -MAX_RPM) { target = -MAX_RPM; }
@@ -217,7 +227,7 @@ int main(void)
 			  g_target_current = DRIVE_ENCODE_CURRENT(-50.0f);
 		  }
 
-		  g_command        = CMD_RUNNING | CMD_SPEED_MODE;
+		  g_command = CMD_RUNNING | CMD_SPEED_MODE;
 	  }
 
 	  Drive_Tick(g_target_current, g_target_speed, g_command);
@@ -226,7 +236,7 @@ int main(void)
 	  Steering_Tick();
 	  test_pwm = Steering_GetPulseWidth();
 
-	  //HAL_Delay(10);
+	  HAL_Delay(10);
 
   }
     /* USER CODE END WHILE */
@@ -307,7 +317,7 @@ static void MX_FDCAN2_Init(void)
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 0;
+  hfdcan2.Init.ExtFiltersNbr = 2;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
@@ -634,6 +644,92 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM8 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM8_Init(void)
+{
+
+  /* USER CODE BEGIN TIM8_Init 0 */
+
+  /* USER CODE END TIM8_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  /* USER CODE BEGIN TIM8_Init 1 */
+
+  /* USER CODE END TIM8_Init 1 */
+  htim8.Instance = TIM8;
+  htim8.Init.Prescaler = 0;
+  htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim8.Init.Period = 65535;
+  htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim8.Init.RepetitionCounter = 0;
+  htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim8, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.BreakAFMode = TIM_BREAK_AFMODE_INPUT;
+  sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+  sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+  sBreakDeadTimeConfig.Break2Filter = 0;
+  sBreakDeadTimeConfig.Break2AFMode = TIM_BREAK_AFMODE_INPUT;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM8_Init 2 */
+
+  /* USER CODE END TIM8_Init 2 */
+  HAL_TIM_MspPostInit(&htim8);
+
+}
+
+/**
   * @brief TIM15 Initialization Function
   * @param None
   * @retval None
@@ -702,13 +798,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1|GPIO_PIN_6, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PC1 PC6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_6;
+  /*Configure GPIO pin : PC1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -747,6 +843,14 @@ static void MX_GPIO_Init(void)
    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
    GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+   /* PB5: FDCAN2 RX, PB6: FDCAN2 TX */
+   GPIO_InitStruct.Pin       = GPIO_PIN_5 | GPIO_PIN_6;
+   GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+   GPIO_InitStruct.Pull      = GPIO_NOPULL;
+   GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+   GPIO_InitStruct.Alternate = GPIO_AF9_FDCAN2;
+   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -866,10 +970,11 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 }
 
 void HAL_SYSTICK_Callback(void) {
-    Drive_Tick(g_target_current, g_target_speed, g_command);
+    //Drive_Tick(g_target_current, g_target_speed, g_command);
 }
 
 void HAL_FDCAN_RxFifo0MsgPendingCallback(FDCAN_HandleTypeDef *hfdcan) {
+	rx_frame_count++;
     FDCAN_RxHeaderTypeDef hdr;
     uint8_t data[8];
     while (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &hdr, data) == HAL_OK)
