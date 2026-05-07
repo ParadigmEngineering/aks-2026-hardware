@@ -7,16 +7,20 @@
 #ifndef BRAKING_H
 #define BRAKING_H
 
+#include <stdint.h>
+#include "stm32g4xx_hal.h"
+
 #define SERVO_CLAMP_MIN_US  500
 #define SERVO_CLAMP_MAX_US  2500
-#define SERVO_APPLIED_US 900
-#define SERVO_UPRIGHT_US 2350
+
+// EDIT THESE TO CHANGE ANGLE:
+#define SERVO_APPLIED_US 1400
+#define SERVO_UPRIGHT_US 1000
 
 /*
  * Servo_WriteMicroseconds()
  * Sends a pulse width directly to the servo. Clamps to safe limits.
  */
-void Servo_WriteMicroseconds(uint16_t us);
-
+void Servo_WriteMicroseconds(uint16_t channel, uint16_t us);
 
 #endif //BRAKING_H
