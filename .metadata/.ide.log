@@ -1,0 +1,321 @@
+2026-05-07 18:47:22,799 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:48:30,522 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:48:30,570 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:48:30,762 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:49:21,446 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:49:21,712 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:49:47,922 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:49:48,084 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:57:38,361 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:57:38,542 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:57:55,865 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:57:56,015 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:59:18,385 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:59:18,587 [INFO] WebApp:191 - Connection restablished
+2026-05-07 18:59:37,398 [INFO] WebApp:194 - Connection lost
+2026-05-07 18:59:37,550 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:01:51,875 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:01:52,060 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:02:35,930 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:02:36,204 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:02:55,871 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:02:56,013 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:04:51,364 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:04:51,634 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:05:19,375 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:05:19,561 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:05:38,367 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:05:38,544 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:05:45,377 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:05:45,632 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:05:54,884 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:05:55,027 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:06:24,392 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:06:24,597 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:06:41,875 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:06:42,030 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:06:58,361 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:06:58,556 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:07:30,386 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:07:30,586 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:08:01,900 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:08:02,063 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:08:07,880 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:08:08,027 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:08:41,912 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:08:42,089 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:09:11,951 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:09:12,153 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:09:25,927 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:09:26,301 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:15:08,323 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:15:08,519 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:15:14,561 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:15:14,768 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:22:26,871 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:22:27,103 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:22:35,122 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:22:35,324 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:25:06,691 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:25:06,883 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:25:18,711 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:25:18,978 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:26:09,384 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:26:09,606 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:27:03,213 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:27:03,504 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:28:44,791 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-05-07 19:28:50,878 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 878044776 Bytes (1073741824)
+2026-05-07 19:28:53,023 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 907927144 Bytes (1073741824)
+2026-05-07 19:28:58,393 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 778138072 Bytes (1073741824)
+2026-05-07 19:29:00,035 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: FDCAN
+2026-05-07 19:29:00,036 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,036 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,036 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,037 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:29:00,038 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2026-05-07 19:29:00,044 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2026-05-07 19:29:00,051 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,051 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,052 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,053 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,053 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,053 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,053 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,053 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,054 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,054 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,054 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,055 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,055 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,055 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,056 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,056 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:29:00,613 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\license.tmp_save
+2026-05-07 19:29:01,247 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\license.tmp
+2026-05-07 19:29:01,535 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\gpio.tmp_save
+2026-05-07 19:29:01,855 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\gpio.tmp
+2026-05-07 19:29:05,007 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_it.c_save
+2026-05-07 19:29:05,669 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_it.c
+2026-05-07 19:29:05,697 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_it.h_save
+2026-05-07 19:29:05,916 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_it.h
+2026-05-07 19:29:05,986 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_hal_msp.c_save
+2026-05-07 19:29:06,463 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_hal_msp.c
+2026-05-07 19:29:06,485 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\system.tmp_save
+2026-05-07 19:29:06,667 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\system.tmp
+2026-05-07 19:29:06,719 [INFO] CodeEngine:321 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_hal_conf.h_save
+2026-05-07 19:29:06,906 [INFO] CodeEngine:345 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_hal_conf.h
+2026-05-07 19:29:06,954 [WARN] IPConfigManager:3238 - Warning: the RefConfig RCC_CommonPeriphClockConfig is not available in your config.xml file
+2026-05-07 19:29:06,965 [WARN] IPConfigManager:3811 - IP not found : TIM
+2026-05-07 19:29:06,970 [WARN] CodeGenerator:4259 - IP not found : null
+2026-05-07 19:29:07,007 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\main.h_save
+2026-05-07 19:29:07,332 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\main.h
+2026-05-07 19:29:07,361 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\main.c_save
+2026-05-07 19:29:07,856 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\main.c
+2026-05-07 19:29:09,374 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 891mS.
+2026-05-07 19:29:09,391 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2026-05-07 19:29:09,657 [INFO] ConfigFileManager:1595 - The Die is : DIE469
+2026-05-07 19:29:12,371 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 2980mS.
+2026-05-07 19:29:12,374 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 2mS.
+2026-05-07 19:29:12,389 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 1mS.
+2026-05-07 19:29:13,527 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:29:13,769 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:29:31,219 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:29:31,385 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:32:07,749 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:32:08,128 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:32:15,740 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:32:15,912 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:33:44,269 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:33:44,468 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:33:49,786 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:33:49,941 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:34:18,275 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:34:18,477 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:34:23,762 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:34:23,920 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:35:33,786 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:35:33,961 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:35:52,794 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:35:53,202 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:36:23,274 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:36:23,503 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:36:29,785 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:36:30,039 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:37:08,306 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:37:08,524 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:37:17,802 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:37:18,095 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:37:41,810 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:37:41,961 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:38:12,828 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:38:13,026 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:38:50,818 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:38:51,029 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:39:16,328 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:39:16,502 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:39:47,824 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:39:47,996 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:44:56,751 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,752 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,753 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,753 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,754 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,754 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,755 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,755 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,755 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,756 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,756 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,757 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,758 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,758 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,759 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,759 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,760 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,760 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,761 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,761 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,762 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,762 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,762 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,762 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,762 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,763 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,763 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,763 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,763 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,764 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,764 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:56,764 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,422 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,423 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,424 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,424 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,424 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,424 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,425 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,425 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,425 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,426 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,426 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,426 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,427 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,427 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,427 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,428 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,777 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,778 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,778 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,779 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,780 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,780 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,780 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,780 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,780 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:44:57,781 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:16,933 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 816156704 Bytes (1073741824)
+2026-05-07 19:45:19,682 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 848662560 Bytes (1073741824)
+2026-05-07 19:45:27,476 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 815407336 Bytes (1073741824)
+2026-05-07 19:45:28,996 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: FDCAN
+2026-05-07 19:45:28,996 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,996 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-05-07 19:45:28,997 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,998 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8G4
+2026-05-07 19:45:28,999 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2026-05-07 19:45:29,002 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2026-05-07 19:45:29,008 [WARN] IP:2250 - MessageRAMOffset not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,008 [WARN] IP:2250 - RxFifo0ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,008 [WARN] IP:2250 - RxFifo0ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - RxFifo1ElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - RxFifo1ElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - RxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - RxBufferSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - TxEventsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - TxBuffersNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - TxFifoQueueElmtsNbr not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - TxElmtSize not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,009 [WARN] IP:2250 - ClockCalibrationCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,010 [WARN] IP:2250 - ClockDividerCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,010 [WARN] IP:2250 - MinOscClkPeriodsCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,010 [WARN] IP:2250 - TimeQuantaPerBitTimeCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,010 [WARN] IP:2250 - WatchdogStartValueCCU not found: check if there is a RefParameter without a condition.
+2026-05-07 19:45:29,462 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\license.tmp_save
+2026-05-07 19:45:30,069 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\license.tmp
+2026-05-07 19:45:30,325 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\gpio.tmp_save
+2026-05-07 19:45:30,643 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\gpio.tmp
+2026-05-07 19:45:32,999 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_it.c_save
+2026-05-07 19:45:33,784 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_it.c
+2026-05-07 19:45:33,804 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_it.h_save
+2026-05-07 19:45:33,986 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_it.h
+2026-05-07 19:45:34,042 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_hal_msp.c_save
+2026-05-07 19:45:34,436 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\stm32g4xx_hal_msp.c
+2026-05-07 19:45:34,454 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\system.tmp_save
+2026-05-07 19:45:34,600 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\MXTmpFiles\system.tmp
+2026-05-07 19:45:34,641 [INFO] CodeEngine:321 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_hal_conf.h_save
+2026-05-07 19:45:34,799 [INFO] CodeEngine:345 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\stm32g4xx_hal_conf.h
+2026-05-07 19:45:34,843 [WARN] IPConfigManager:3238 - Warning: the RefConfig RCC_CommonPeriphClockConfig is not available in your config.xml file
+2026-05-07 19:45:34,854 [WARN] IPConfigManager:3811 - IP not found : TIM
+2026-05-07 19:45:34,856 [WARN] CodeGenerator:4259 - IP not found : null
+2026-05-07 19:45:34,887 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\main.h_save
+2026-05-07 19:45:35,111 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Inc\main.h
+2026-05-07 19:45:35,133 [INFO] CodeEngine:265 - oldGeneratedFile, C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\main.c_save
+2026-05-07 19:45:35,519 [INFO] CodeEngine:289 - Generated code: C:\MUN\Paradigm\aks-2026-hardware\firmware\ParadigmSTM32G474\Core\Src\main.c
+2026-05-07 19:45:36,404 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 490mS.
+2026-05-07 19:45:36,418 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2026-05-07 19:45:36,599 [INFO] ConfigFileManager:1595 - The Die is : DIE469
+2026-05-07 19:45:39,542 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 3124mS.
+2026-05-07 19:45:39,555 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 11mS.
+2026-05-07 19:45:39,565 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 0mS.
+2026-05-07 19:48:17,015 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:48:17,269 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:51:07,919 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:51:08,167 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:51:15,460 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:51:15,766 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:51:30,981 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:51:31,150 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:51:45,944 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:51:46,139 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:52:41,426 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:52:41,687 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:52:51,443 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:52:51,692 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:53:06,927 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:53:07,198 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:53:21,446 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:53:21,594 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:53:38,408 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:53:38,673 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:53:47,423 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:53:47,571 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:54:07,922 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:54:08,072 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:57:38,459 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:57:38,951 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:57:44,997 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:57:45,151 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:58:47,974 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:58:48,235 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:59:21,735 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:59:22,045 [INFO] WebApp:191 - Connection restablished
+2026-05-07 19:59:23,977 [INFO] WebApp:194 - Connection lost
+2026-05-07 19:59:24,136 [INFO] WebApp:191 - Connection restablished
