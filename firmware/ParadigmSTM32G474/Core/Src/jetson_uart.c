@@ -37,7 +37,7 @@
 #define JETSON_CMD_NEUTRAL 	1500
 #define JETSON_CMD_MAX 		2000
 
-#define JETSON_TIMEOUT_US 100
+#define JETSON_TIMEOUT_MS 500
 
 typedef enum {
 	PARSER_WAIT_START_1 = 0,
@@ -203,7 +203,7 @@ bool Jetson_CommandIsFresh(uint32_t timeout_us) {
 }
 
 bool Jetson_CommandAllowAutonomous() {
-	if (!Jetson_CommandIsFresh(JETSON_TIMEOUT_US)) {
+	if (!Jetson_CommandIsFresh(JETSON_TIMEOUT_MS)) {
 		return false;
 	}
 

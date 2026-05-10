@@ -25,6 +25,7 @@
 #include "drive_can.h"
 #include "steering.h"
 #include "jetson_uart.h"
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -39,7 +40,9 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define MAX_RPM 300
+#define MAX_RPM 2000
+
+#define MODE_SWITCH_US 1500
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -57,14 +60,20 @@ TIM_HandleTypeDef htim15;
 /* USER CODE BEGIN PV */
 /* Latest measured pulse widths — updated in input capture callback */
 static volatile uint32_t g_throttle_us    = 1500;  /* default = centre  */
-static volatile uint32_t g_estop_us       = 1200;  /* default = inactive */
+static volatile uint32_t g_estop_us       = 2000;  /* default = inactive */
 static volatile uint32_t g_last_pulse_ms  = 0;     /* for signal-lost detection */
+static volatile uint32_t g_mode_us       = 2000;
+
+static volatile uint16_t active_throttle_us = 1500;
+static volatile uint16_t active_steering_us = 1500;
 
 /* Rise-edge timestamps and fall-edge flags for each channel */
 static volatile uint32_t g_ch3_rise = 0;
 static volatile uint32_t g_ch4_rise = 0;
 static volatile uint8_t  g_ch3_fall = 0;
 static volatile uint8_t  g_ch4_fall = 0;
+static volatile uint8_t  g_tim2_ch4_fall = 0;
+static volatile uint32_t  g_tim2_ch4_rise = 0;
 
 static int16_t g_target_current = 0;
 static int16_t g_target_speed = 0;
@@ -83,6 +92,8 @@ static volatile uint16_t g_autonomous_throttle_us = 1500;
 static volatile uint16_t g_autonomous_steering_us = 1500;
 
 extern volatile uint32_t rx_frame_count;
+
+static volatile int autonomous;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,7 +126,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	SCB->VTOR = 0x08000000; // Remaps vector table to flash so STM doesn't get stuck in loop
+  SCB->VTOR = 0x08000000; // Remaps vector table to flash so STM doesn't get stuck in loop
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -153,11 +164,12 @@ int main(void)
 
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // throttle
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4); // e-stop
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_4); // RC/auto switch
 
   Steering_Init(&htim1, &htim15);
 
-  //Jetson_Init();
-  //HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
+  Jetson_Init();
+  HAL_UART_Receive_IT(&hlpuart1, &jetson_rx_byte, 1);
 
   /* USER CODE END 2 */
 
@@ -201,13 +213,51 @@ int main(void)
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command = CMD_HALTED;
+
+		  Drive_Tick(g_target_current, g_target_speed, g_command);
+		  Steering_SetTargetUs(1500);
+		  Steering_Tick();
+		  test_pwm = Steering_GetPulseWidth();
+		  HAL_Delay(10);
+		  continue;
 	  }
 
-	  // ---- Normal operation ----
-	  else if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
+	  // Autonomous operation
+	  if (g_mode_us > MODE_SWITCH_US) {
+		  autonomous = 1;
+		  bool jetson_ok = UpdateJetsonCommands();
+			  if (jetson_ok) {
+				  active_throttle_us = g_autonomous_throttle_us;
+				  active_steering_us = g_autonomous_steering_us;
+				  Steering_SetTargetUs(active_steering_us);
+			  } else {
+				  active_throttle_us = 1500;
+				  active_steering_us = g_autonomous_steering_us;
+				  Steering_SetTargetUs(active_steering_us);
+			  }
+	  } else {
+		  autonomous = 0;
+		  active_throttle_us = (uint16_t)g_throttle_us;
+	  }
+
+	  /*bool autonomous_mode = (g_mode_us > MODE_SWITCH_LOW_US);
+
+	  if (autonomous_mode) {
+		  bool jetson_ok = UpdateJetsonCommands();
+		  if (jetson_ok) {
+			  active_throttle_us = g_autonomous_throttle_us;
+			  active_steering_us = g_autonomous_steering_us;
+		  }
+	  } else {
+		  active_throttle_us = (uint16_t)g_throttle_us;
+		  active_steering_us = Steering_GetPulseWidth();
+	  }*/
+
+	  // Normal operation
+	  if (Drive_GetState() == DRIVE_STATE_OPERATIONAL) {
 
 		  // Map 1000-2000µs to -1000..+1000 rpm with ±50µs deadband
-		  int32_t deviation = (int32_t)g_throttle_us - 1500;
+		  int32_t deviation = (int32_t)active_throttle_us - 1500;
 		  int32_t target = 0;
 
 		  if (deviation > 100)
@@ -221,10 +271,10 @@ int main(void)
 
 		  if (target >= 0) {
 			  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
-			  g_target_current = DRIVE_ENCODE_CURRENT(50.0f);
+			  g_target_current = DRIVE_ENCODE_CURRENT(80.0f);
 		  } else {
 			  g_target_speed   = DRIVE_ENCODE_SPEED((float)target);
-			  g_target_current = DRIVE_ENCODE_CURRENT(-50.0f);
+			  g_target_current = DRIVE_ENCODE_CURRENT(-80.0f);
 		  }
 
 		  g_command = CMD_RUNNING | CMD_SPEED_MODE;
@@ -233,8 +283,19 @@ int main(void)
 	  Drive_Tick(g_target_current, g_target_speed, g_command);
 
 	  //Steering
+	  /*if (autonomous == 1) {
+		  Steering_SetTargetUs(active_steering_us);
+	  }*/
 	  Steering_Tick();
 	  test_pwm = Steering_GetPulseWidth();
+
+	  if (estopped){
+		  Servo_WriteMicroseconds(1, SERVO_APPLIED_US);
+		  Servo_WriteMicroseconds(2, SERVO_APPLIED_US);
+	  } else {
+		  Servo_WriteMicroseconds(1, SERVO_UPRIGHT_US);
+		  Servo_WriteMicroseconds(2, SERVO_UPRIGHT_US);
+	  }
 
 	  HAL_Delay(10);
 
@@ -481,7 +542,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 124;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 255;
+  htim2.Init.Period = 65535;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -511,8 +572,13 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM2_Init 2 */
-
+  HAL_NVIC_SetPriority(TIM2_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM2_IRQn);
   /* USER CODE END TIM2_Init 2 */
 
 }
@@ -852,6 +918,14 @@ static void MX_GPIO_Init(void)
    GPIO_InitStruct.Alternate = GPIO_AF9_FDCAN2;
    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+   /* PB11: TIM2 CH4 mode switch input */
+   GPIO_InitStruct.Pin       = GPIO_PIN_11;
+   GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+   GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+   GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
@@ -967,6 +1041,32 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
             }
         }
     }
+
+    // TIM2 CH4: RC/Autonomous mdoe switch
+    if (htim->Instance == TIM2) {
+            if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4) {
+                if (g_tim2_ch4_fall == 0) {
+                    /* Rising edge — record counter value */
+                    g_tim2_ch4_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
+                    __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4,
+                                                  TIM_INPUTCHANNELPOLARITY_FALLING);
+                    g_tim2_ch4_fall = 1;
+                } else {
+                    /* Falling edge — compute pulse width */
+                    uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);
+                    uint32_t width = (end >= g_tim2_ch4_rise)
+                                     ? (end - g_tim2_ch4_rise)
+                                     : (65535 - g_tim2_ch4_rise + end + 1);
+
+                    /* TIM2 prescaler=124, 16 MHz → tick = 8 µs — NO divide needed */
+                    g_mode_us = (width * 125) / 16;
+
+                    __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4,
+                                                  TIM_INPUTCHANNELPOLARITY_RISING);
+                    g_tim2_ch4_fall = 0;
+                }
+            }
+        }
 }
 
 void HAL_SYSTICK_Callback(void) {

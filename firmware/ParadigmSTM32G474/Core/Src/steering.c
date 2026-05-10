@@ -51,3 +51,8 @@ SteeringController_t* Steering_GetHandle(void) {
     return &steering;
 }
 
+void Steering_SetTargetUs(uint16_t pulse_us) {
+    SteeringController_t *s = Steering_GetHandle();
+    s->input_width_us = pulse_us;
+}
+

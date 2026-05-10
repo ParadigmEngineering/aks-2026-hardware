@@ -2,3 +2,4 @@
 ../Core/Src/steering.c:22:6:Steering_Tick	24	static
 ../Core/Src/steering.c:45:10:Steering_GetPulseWidth	4	static
 ../Core/Src/steering.c:50:23:Steering_GetHandle	4	static
+../Core/Src/steering.c:54:6:Steering_SetTargetUs	24	static
