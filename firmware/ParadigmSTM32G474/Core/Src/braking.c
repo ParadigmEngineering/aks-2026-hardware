@@ -13,10 +13,12 @@ void Servo_WriteMicroseconds(uint16_t channel, uint16_t us){
     if (us < SERVO_CLAMP_MIN_US) us = SERVO_CLAMP_MIN_US;
     if (us > SERVO_CLAMP_MAX_US) us = SERVO_CLAMP_MAX_US;
 
+    uint32_t ticks = (uint32_t)us * 16;  // 16 MHz, prescaler = 0
+
     if (channel == 1){
-    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, us);
+    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, ticks);
     }
     else if (channel == 2){
-    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, us);
+    	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, ticks);
     }
 }

@@ -166,6 +166,8 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // throttle
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4); // e-stop
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_4); // RC/auto switch
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // brake 1
+  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2); // brake 2
 
   Steering_Init(&htim1, &htim15);
 
@@ -221,6 +223,8 @@ int main(void)
 		  Steering_SetTargetUs(1500);
 		  Steering_Tick();
 		  test_pwm = Steering_GetPulseWidth();
+		  Servo_WriteMicroseconds(1, SERVO_APPLIED_US);
+		  Servo_WriteMicroseconds(2, SERVO_APPLIED_US);
 		  HAL_Delay(10);
 		  continue;
 	  }
@@ -292,13 +296,8 @@ int main(void)
 	  Steering_Tick();
 	  test_pwm = Steering_GetPulseWidth();
 
-	  if (estopped){
-		  Servo_WriteMicroseconds(1, SERVO_APPLIED_US);
-		  Servo_WriteMicroseconds(2, SERVO_APPLIED_US);
-	  } else {
-		  Servo_WriteMicroseconds(1, SERVO_UPRIGHT_US);
-		  Servo_WriteMicroseconds(2, SERVO_UPRIGHT_US);
-	  }
+	  Servo_WriteMicroseconds(1, SERVO_UPRIGHT_US);
+	  Servo_WriteMicroseconds(2, SERVO_UPRIGHT_US);
 
 	  HAL_Delay(10);
 
