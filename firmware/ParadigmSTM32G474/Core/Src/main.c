@@ -60,10 +60,11 @@ TIM_HandleTypeDef htim15;
 
 /* USER CODE BEGIN PV */
 /* Latest measured pulse widths — updated in input capture callback */
-static volatile uint32_t g_throttle_us    = 1500;  /* default = centre  */
-static volatile uint32_t g_estop_us       = 2000;  /* default = inactive */
-static volatile uint32_t g_last_pulse_ms  = 0;     /* for signal-lost detection */
-static volatile uint32_t g_mode_us       = 2000;
+static volatile uint32_t g_throttle_us    = 1500;  // default = centre
+static volatile uint32_t g_estop_us       = 2000;  // default = inactive
+static voltaile uint32_t g_ustop_us       = 2000; // default = inactive
+static volatile uint32_t g_last_pulse_ms  = 0;     // for signal-lost detection
+static volatile uint32_t g_mode_us        = 2000;
 
 static volatile uint16_t active_throttle_us = 1500;
 static volatile uint16_t active_steering_us = 1500;
@@ -75,6 +76,9 @@ static volatile uint8_t  g_ch3_fall = 0;
 static volatile uint8_t  g_ch4_fall = 0;
 static volatile uint8_t  g_tim2_ch4_fall = 0;
 static volatile uint32_t  g_tim2_ch4_rise = 0;
+
+static volatile uint8_t  g_tim2_ch3_fall = 0;
+static volatile uint32_t  g_tim2_ch3_rise = 0;
 
 static int16_t g_target_current = 0;
 static int16_t g_target_speed = 0;
@@ -190,6 +194,7 @@ int main(void)
 
 	  bool signal_ok = (g_last_pulse_ms > 0) && (HAL_GetTick() - g_last_pulse_ms < 100);
 	  bool estopped  = !signal_ok || (g_estop_us > 1500);
+	  bool ustopped = g_ustop_us > 1600;
 	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 
 	  //bool estopped = false;
@@ -228,6 +233,23 @@ int main(void)
 		  HAL_Delay(10);
 		  continue;
 	  }
+
+	  // U-stop
+	  if (estopped) {
+		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
+		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
+		  g_command = CMD_HALTED;
+
+		  Drive_Tick(g_target_current, g_target_speed, g_command);
+		  Steering_SetTargetUs(1500);
+		  Steering_Tick();
+		  test_pwm = Steering_GetPulseWidth();
+		  Servo_WriteMicroseconds(1, SERVO_APPLIED_US);
+		  Servo_WriteMicroseconds(2, SERVO_APPLIED_US);
+		  HAL_Delay(10);
+		  continue;
+	  }
+
 
 	  // Autonomous operation
 	  if (g_mode_us > MODE_SWITCH_US) {
@@ -895,6 +917,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PB13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* PB14: TIM15 CH1 steering input */
@@ -1054,8 +1084,9 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         }
     }
 
-    // TIM2 CH4: RC/Autonomous mdoe switch
+    // TIM2
     if (htim->Instance == TIM2) {
+        	// CH4: RC/Autonomous mdoe switch
             if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4) {
                 if (g_tim2_ch4_fall == 0) {
                     /* Rising edge — record counter value */
@@ -1078,6 +1109,32 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
                     g_tim2_ch4_fall = 0;
                 }
             }
+
+            // CH 3: Urgent Stop
+            if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) {
+				if (g_tim2_ch3_fall == 0) {
+					/* Rising edge — record counter value */
+					g_tim2_ch3_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+					__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
+												  TIM_INPUTCHANNELPOLARITY_FALLING);
+					g_tim2_ch3_fall = 1;
+				} else {
+					/* Falling edge — compute pulse width */
+					uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+					uint32_t width = (end >= g_tim2_ch3_rise)
+									 ? (end - g_tim2_ch3_rise)
+									 : (65535 - g_tim2_ch3_rise + end + 1);
+
+					/* TIM2 prescaler=124, 16 MHz → tick = 8 µs — NO divide needed */
+					g_mode_us = (width * 125) / 16;
+
+					__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
+												  TIM_INPUTCHANNELPOLARITY_RISING);
+					g_tim2_ch3_fall = 0;
+				}
+			}
+
+
         }
 }
 

@@ -291,12 +291,12 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
     HAL_GPIO_Init(TIM2_CH4_GPIO_Port, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = Steering_Output_Pin;
+    GPIO_InitStruct.Pin = TIM2_CH3_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF10_TIM2;
-    HAL_GPIO_Init(Steering_Output_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(TIM2_CH3_GPIO_Port, &GPIO_InitStruct);
 
     /* TIM2 interrupt Init */
     HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
@@ -411,15 +411,15 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     /* USER CODE BEGIN TIM1_MspPostInit 0 */
 
     /* USER CODE END TIM1_MspPostInit 0 */
-    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
     /**TIM1 GPIO Configuration
-    PC0     ------> TIM1_CH1
+    PA8     ------> TIM1_CH1
     */
     GPIO_InitStruct.Pin = Steering_Output_B_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
+    GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
     HAL_GPIO_Init(Steering_Output_B_GPIO_Port, &GPIO_InitStruct);
 
     /* USER CODE BEGIN TIM1_MspPostInit 1 */
@@ -483,7 +483,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     */
     HAL_GPIO_DeInit(TIM2_CH4_GPIO_Port, TIM2_CH4_Pin);
 
-    HAL_GPIO_DeInit(Steering_Output_GPIO_Port, Steering_Output_Pin);
+    HAL_GPIO_DeInit(TIM2_CH3_GPIO_Port, TIM2_CH3_Pin);
 
     /* TIM2 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM2_IRQn);

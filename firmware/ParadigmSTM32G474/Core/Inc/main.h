@@ -59,16 +59,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Steering_Output_B_Pin GPIO_PIN_0
-#define Steering_Output_B_GPIO_Port GPIOC
 #define TIM2_CH4_Pin GPIO_PIN_11
 #define TIM2_CH4_GPIO_Port GPIOB
 #define Braking1_Pin GPIO_PIN_6
 #define Braking1_GPIO_Port GPIOC
 #define Braking2_Pin GPIO_PIN_7
 #define Braking2_GPIO_Port GPIOC
-#define Steering_Output_Pin GPIO_PIN_9
-#define Steering_Output_GPIO_Port GPIOA
+#define Steering_Output_B_Pin GPIO_PIN_8
+#define Steering_Output_B_GPIO_Port GPIOA
+#define TIM2_CH3_Pin GPIO_PIN_9
+#define TIM2_CH3_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
