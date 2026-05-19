@@ -235,7 +235,7 @@ int main(void)
 	  }
 
 	  // U-stop
-	  if (estopped) {
+	  if (ustopped) {
 		  g_target_speed   = DRIVE_ENCODE_SPEED(0.0f);
 		  g_target_current = DRIVE_ENCODE_CURRENT(0.0f);
 		  g_command = CMD_HALTED;
