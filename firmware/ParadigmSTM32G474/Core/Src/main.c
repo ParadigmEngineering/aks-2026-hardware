@@ -62,7 +62,7 @@ TIM_HandleTypeDef htim15;
 /* Latest measured pulse widths — updated in input capture callback */
 static volatile uint32_t g_throttle_us    = 1500;  // default = centre
 static volatile uint32_t g_estop_us       = 2000;  // default = inactive
-static voltaile uint32_t g_ustop_us       = 2000; // default = inactive
+static volatile uint32_t g_ustop_us       = 2000; // default = inactive
 static volatile uint32_t g_last_pulse_ms  = 0;     // for signal-lost detection
 static volatile uint32_t g_mode_us        = 2000;
 
@@ -170,6 +170,7 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3); // throttle
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4); // e-stop
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_4); // RC/auto switch
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_3); // u-stop
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1); // brake 1
   HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2); // brake 2
 
@@ -566,7 +567,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 124;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 255;
+  htim2.Init.Period = 65535;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -968,6 +969,14 @@ static void MX_GPIO_Init(void)
    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+   /* PA9: TIM2 CH3 urgent stop input */
+   GPIO_InitStruct.Pin       = GPIO_PIN_9;
+   GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+   GPIO_InitStruct.Pull      = GPIO_PULLDOWN;
+   GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
+   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
@@ -1077,15 +1086,18 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
                                     ? (end - s->input_start)
                                     : (65535 - s->input_start + end + 1);
                 s->input_width_us = width / 16;
-                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1,
-                                              TIM_INPUTCHANNELPOLARITY_RISING);
+                __disable_irq();
+                __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
                 s->input_edge = 0;
+                __enable_irq();
             }
         }
     }
 
     // TIM2
     if (htim->Instance == TIM2) {
+
+    	uint32_t now = HAL_GetTick();
         	// CH4: RC/Autonomous mdoe switch
             if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4) {
                 if (g_tim2_ch4_fall == 0) {
@@ -1104,37 +1116,37 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
                     /* TIM2 prescaler=124, 16 MHz → tick = 8 µs — NO divide needed */
                     g_mode_us = (width * 125) / 16;
 
+                    __disable_irq();
                     __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4,
                                                   TIM_INPUTCHANNELPOLARITY_RISING);
                     g_tim2_ch4_fall = 0;
+                    __enable_irq();
                 }
             }
 
             // CH 3: Urgent Stop
             if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3) {
 				if (g_tim2_ch3_fall == 0) {
-					/* Rising edge — record counter value */
-					g_tim2_ch3_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
-					__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
-												  TIM_INPUTCHANNELPOLARITY_FALLING);
-					g_tim2_ch3_fall = 1;
-				} else {
-					/* Falling edge — compute pulse width */
-					uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
-					uint32_t width = (end >= g_tim2_ch3_rise)
-									 ? (end - g_tim2_ch3_rise)
-									 : (65535 - g_tim2_ch3_rise + end + 1);
+						/* Rising edge — record start */
+						g_tim2_ch3_rise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+						__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
+													  TIM_INPUTCHANNELPOLARITY_FALLING);
+						g_tim2_ch3_fall = 1;
+					} else {
+						/* Falling edge — measure width */
+						uint32_t end   = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);
+						uint32_t width = (end >= g_tim2_ch3_rise)
+										 ? (end - g_tim2_ch3_rise)
+										 : (65535 - g_tim2_ch3_rise + end + 1); /* overflow safe */
 
-					/* TIM2 prescaler=124, 16 MHz → tick = 8 µs — NO divide needed */
-					g_mode_us = (width * 125) / 16;
-
-					__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
-												  TIM_INPUTCHANNELPOLARITY_RISING);
-					g_tim2_ch3_fall = 0;
-				}
-			}
-
-
+						g_ustop_us = (width * 125) / 16;
+						g_last_pulse_ms = now;
+;
+						__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3,
+													  TIM_INPUTCHANNELPOLARITY_RISING);
+						g_tim2_ch3_fall = 0;
+					}
+            	}
         }
 }
 
